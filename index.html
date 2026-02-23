@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>La Cocina Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#FAF6EE;--warm:#F2EAD8;--warmer:#E8DCC4;--brown:#2A1C10;--rust:#BE4A1E;--rust-h:#A83D18;
+  --gold:#C4903A;--olive:#4E6124;--olive-h:#627A2C;--text:#1E1208;--muted:#7A6350;--muted-l:#A89078;
+  --card:#FFFDF6;--border:#DDD0B8;--border-l:#EDE4D0;--danger:#B83226;
+  --shadow:0 1px 6px rgba(42,28,16,.07);--shadow-md:0 4px 20px rgba(42,28,16,.12);
+  --sw:210px;--th:56px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);font-size:14px;line-height:1.5}
+.layout{display:flex;min-height:100dvh}
+
+/* SIDEBAR */
+.sidebar{width:var(--sw);min-width:var(--sw);background:var(--brown);position:fixed;inset:0 auto 0 0;display:flex;flex-direction:column;z-index:200;overflow-y:auto;-webkit-overflow-scrolling:touch;transition:transform .25s ease}
+.sblogo{padding:24px 20px 16px;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0}
+.brand{font-family:'Cormorant Garamond',serif;font-size:1.45rem;font-weight:700;color:#F5E8C8;letter-spacing:.3px}
+.brand-sub{font-size:.63rem;color:rgba(245,232,200,.3);letter-spacing:1.8px;text-transform:uppercase;margin-top:2px}
+.nav-sec{padding:12px 10px 4px}
+.nav-lbl{font-size:.6rem;text-transform:uppercase;letter-spacing:1.6px;color:rgba(245,232,200,.25);padding:0 10px;margin-bottom:4px}
+.nav-btn{display:flex;align-items:center;width:100%;padding:9px 10px;border:none;background:transparent;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:400;color:rgba(245,232,200,.5);cursor:pointer;transition:background .15s,color .15s;text-align:left;margin-bottom:1px}
+.nav-btn:hover{background:rgba(255,255,255,.06);color:rgba(245,232,200,.85)}
+.nav-btn.active{background:var(--rust);color:#fff;font-weight:500}
+.sb-foot{margin-top:auto;padding:14px 20px;font-size:.63rem;color:rgba(245,232,200,.18);border-top:1px solid rgba(255,255,255,.05);flex-shrink:0}
+
+/* TOPBAR */
+.topbar{display:none;position:fixed;top:0;left:0;right:0;height:var(--th);background:var(--brown);z-index:200;align-items:center;justify-content:space-between;padding:0 16px}
+.tb-brand{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:700;color:#F5E8C8}
+.ham{background:none;border:none;cursor:pointer;padding:8px;display:flex;flex-direction:column;gap:5px}
+.ham span{display:block;width:22px;height:2px;background:rgba(245,232,200,.65);border-radius:2px}
+.d-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:190}
+.d-overlay.open{display:block}
+
+/* MAIN */
+.main{margin-left:var(--sw);flex:1;padding:34px 34px 80px;min-height:100dvh}
+.section{display:none}.section.active{display:block}
+
+/* HEADERS */
+.phd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;flex-wrap:wrap;gap:10px}
+.ptitle{font-family:'Cormorant Garamond',serif;font-size:1.85rem;font-weight:600;color:var(--brown);line-height:1.1}
+.psub{font-size:.8rem;color:var(--muted);margin-top:3px}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border-l);border-radius:12px;padding:18px 20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.ctitle{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:600;color:var(--brown);margin-bottom:12px}
+
+/* STATS */
+.srow{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:18px}
+.sc{background:var(--card);border:1px solid var(--border-l);border-radius:10px;padding:14px 16px;box-shadow:var(--shadow)}
+.slbl{font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px}
+.sval{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:600;color:var(--brown);line-height:1}
+.ssub{font-size:.68rem;color:var(--muted-l);margin-top:3px}
+
+/* FORMS */
+label{display:block;font-size:.7rem;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+input[type=text],input[type=number],input[type=date],select,textarea{width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;background:var(--cream);font-family:'DM Sans',sans-serif;font-size:.88rem;color:var(--text);outline:none;transition:border-color .15s,box-shadow .15s;-webkit-appearance:none;appearance:none}
+input:focus,select:focus,textarea:focus{border-color:var(--rust);box-shadow:0 0 0 3px rgba(190,74,30,.08)}
+textarea{resize:vertical;min-height:60px}
+.frow{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:8px}
+.fg{margin-bottom:10px}
+
+/* BUTTONS */
+.btn{padding:8px 16px;border:none;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:500;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.bp{background:var(--rust);color:#fff}.bp:hover{background:var(--rust-h)}.bp:active{transform:scale(.97)}
+.bs{background:var(--warm);color:var(--brown);border:1px solid var(--border)}.bs:hover{background:var(--warmer)}
+.bg{background:transparent;color:var(--muted);border:1px solid var(--border)}.bg:hover{background:var(--warm);color:var(--text)}
+.bsucc{background:var(--olive);color:#fff}.bsucc:hover{background:var(--olive-h)}
+.bdng{background:#FDECEA;color:var(--danger);border:1px solid #F5C6C2}.bdng:hover{background:#f9d0cd}
+.bsm{padding:6px 11px;font-size:.76rem}
+.bxs{padding:4px 8px;font-size:.7rem}
+
+/* BADGES */
+.badge{display:inline-block;padding:2px 7px;border-radius:20px;font-size:.67rem;font-weight:600}
+.bg2{background:var(--warm);color:var(--muted)}
+.bgrn{background:#E4EFD4;color:var(--olive)}
+.bred{background:#FDECEA;color:var(--danger)}
+.byel{background:#FBF0D8;color:#8A6800}
+
+/* TABLES */
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;min-width:480px}
+th{text-align:left;font-size:.65rem;font-weight:500;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);padding:7px 9px;border-bottom:1.5px solid var(--border-l);white-space:nowrap}
+td{padding:9px 9px;border-bottom:1px solid var(--border-l);font-size:.84rem;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--warm)}
+
+/* MISC */
+.empty{text-align:center;padding:36px 20px;color:var(--muted-l)}
+.empty p{font-size:.82rem}
+.del-btn{background:none;border:none;color:var(--muted-l);cursor:pointer;font-size:.82rem;padding:5px 6px;border-radius:5px;font-weight:600;transition:all .15s}
+.del-btn:hover{color:var(--danger);background:#FDECEA}
+.pbar{height:6px;background:var(--warmer);border-radius:3px;overflow:hidden;margin-top:4px}
+.pbar-f{height:100%;border-radius:3px;transition:width .35s ease}
+.divl{border:none;border-top:1px solid var(--border-l);margin:12px 0}
+.tag{display:inline-block;padding:4px 10px;border-radius:20px;font-size:.72rem;border:1.5px solid var(--border);background:var(--cream);color:var(--muted);cursor:pointer;user-select:none;transition:all .15s}
+.tag.active{background:#FDECEA;border-color:var(--danger);color:var(--danger)}
+
+/* MODAL */
+.mwrap{position:fixed;inset:0;background:rgba(42,28,16,.45);z-index:300;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.mwrap.open{opacity:1;pointer-events:all}
+.modal{background:var(--card);border-radius:16px 16px 0 0;padding:22px 20px 32px;width:100%;max-height:90dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;transform:translateY(40px);transition:transform .25s ease;max-width:560px}
+.mwrap.open .modal{transform:translateY(0)}
+.mhd{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.mtitle{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;color:var(--brown)}
+.mclose{background:var(--warm);border:none;font-size:.95rem;color:var(--muted);cursor:pointer;padding:5px 9px;border-radius:6px;font-weight:600}
+@media(min-width:600px){.mwrap{align-items:center;padding:20px}.modal{border-radius:14px}}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--brown);color:#F5E8C8;padding:10px 18px;border-radius:7px;font-size:.82rem;box-shadow:var(--shadow-md);z-index:999;white-space:nowrap;transition:transform .25s}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* RECIPE GRID */
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:13px}
+.rcard{background:var(--card);border:1px solid var(--border-l);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);cursor:pointer;transition:transform .15s,box-shadow .15s}
+.rcard:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.rcard-h{height:72px;background:linear-gradient(135deg,var(--warmer),var(--warm));display:flex;align-items:center;justify-content:center}
+.rcard-h span{font-family:'Cormorant Garamond',serif;font-size:.9rem;font-weight:600;color:var(--muted);letter-spacing:.5px}
+.rcard-b{padding:11px 13px}
+.rcard-n{font-family:'Cormorant Garamond',serif;font-size:.98rem;font-weight:600;color:var(--brown);margin-bottom:2px}
+.rcard-m{font-size:.7rem;color:var(--muted);margin-bottom:6px}
+
+/* BUILDER */
+.ss{display:flex;align-items:center;gap:9px;background:var(--warm);border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-bottom:12px;flex-wrap:wrap}
+.ss label{margin:0;white-space:nowrap}
+.ss input{width:65px;text-align:center}
+.slist{list-style:none}
+.sli{display:flex;gap:11px;margin-bottom:11px;align-items:flex-start}
+.snum{width:25px;height:25px;background:var(--rust);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;flex-shrink:0;margin-top:3px}
+.cpanel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.cbig{font-family:'Cormorant Garamond',serif;font-size:2.1rem;font-weight:700;color:var(--rust);line-height:1}
+.crow{display:flex;justify-content:space-between;font-size:.82rem;padding:5px 0}
+.crow+.crow{border-top:1px solid var(--border-l)}
+.bgrid{display:grid;grid-template-columns:1fr 285px;gap:16px;align-items:start}
+
+/* CASH */
+.dgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:13px;margin-bottom:16px}
+.dcard{background:var(--card);border:1px solid var(--border-l);border-radius:10px;padding:14px 16px;box-shadow:var(--shadow)}
+.dtitle{font-size:.67rem;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:10px;font-weight:600}
+.drow{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.dlbl{font-size:.83rem;font-weight:500;color:var(--text);min-width:48px}
+.dqty{display:flex;align-items:center;gap:5px;flex:1}
+.dqty button{width:28px;height:28px;border:1px solid var(--border);border-radius:5px;background:var(--warm);color:var(--text);font-size:1rem;cursor:pointer;font-weight:600;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background .12s}
+.dqty button:hover{background:var(--warmer)}
+.dqty input{width:55px;text-align:center;padding:4px 6px}
+.dval{font-size:.82rem;font-weight:600;color:var(--muted);min-width:55px;text-align:right}
+
+/* CASH TOTAL PANEL */
+.ctp{background:var(--brown);border-radius:12px;padding:20px 24px;color:#F5E8C8;margin-bottom:16px}
+.ctp .lbl{font-size:.66rem;text-transform:uppercase;letter-spacing:1px;opacity:.4;margin-bottom:3px}
+.ctp .val{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:700;line-height:1;margin-bottom:10px}
+.csr{display:flex;justify-content:space-between;font-size:.79rem;padding:5px 0;border-top:1px solid rgba(255,255,255,.08);opacity:.75}
+.csr strong{opacity:1}
+.recon-box{border-radius:8px;padding:12px 14px;margin-top:10px}
+.recon-ok{background:rgba(78,97,36,.4);border:1px solid rgba(120,160,50,.3)}
+.recon-over{background:rgba(196,144,58,.25);border:1px solid rgba(196,144,58,.3)}
+.recon-short{background:rgba(184,50,38,.3);border:1px solid rgba(184,50,38,.3)}
+
+/* FINANCE TABS */
+.ftabs{display:flex;gap:2px;background:var(--warm);border-radius:9px;padding:3px;margin-bottom:18px;border:1px solid var(--border-l);overflow-x:auto;-webkit-overflow-scrolling:touch}
+.ftab{padding:7px 14px;border:none;background:transparent;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:500;color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .15s}
+.ftab:hover{color:var(--text)}
+.ftab.active{background:var(--card);color:var(--brown);box-shadow:var(--shadow);font-weight:600}
+.ftab-c{display:none}.ftab-c.active{display:block}
+
+/* BAR CHART */
+.barchart{display:flex;flex-direction:column;gap:8px}
+.barchart-row{display:grid;grid-template-columns:120px 1fr 70px;align-items:center;gap:10px;font-size:.8rem}
+.barchart-bar{height:8px;background:var(--warmer);border-radius:4px;overflow:hidden}
+.barchart-fill{height:100%;border-radius:4px;background:var(--rust);transition:width .4s ease}
+
+/* BOTTOM NAV */
+.bnav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:150;background:var(--brown);border-top:1px solid rgba(255,255,255,.06);padding:5px 0 env(safe-area-inset-bottom,5px)}
+.bnav-in{display:flex;justify-content:space-around}
+.bb{background:none;border:none;color:rgba(245,232,200,.4);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.58rem;font-weight:500;display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 6px;border-radius:6px;min-width:44px;letter-spacing:.1px;transition:color .15s}
+.bb.active{color:#fff}
+.bdot{width:4px;height:4px;border-radius:2px;background:var(--rust);display:none}
+.bb.active .bdot{display:block}
+
+/* RESPONSIVE */
+@media(max-width:900px){.bgrid{grid-template-columns:1fr}.sticky-panel{position:static!important}}
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0);box-shadow:4px 0 24px rgba(0,0,0,.25)}
+  .topbar{display:flex}.main{margin-left:0;padding:70px 14px 88px}
+  .ptitle{font-size:1.45rem}.srow{grid-template-columns:repeat(2,1fr)}.rgrid{grid-template-columns:repeat(2,1fr)}
+  .dgrid{grid-template-columns:1fr}.ftabs{flex-wrap:nowrap}
+}
+@media(max-width:420px){.main{padding:66px 11px 82px}.srow{gap:8px}.card{padding:14px 14px}}
+@media(max-width:768px){.bnav{display:block}}
+@media print{.sidebar,.topbar,.bnav,.btn,.del-btn,.mwrap,.toast{display:none!important}.main{margin-left:0!important;padding:16px!important}.card{box-shadow:none!important}}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sblogo"><div class="brand">La Cocina</div><div class="brand-sub">Pro Kitchen Suite</div></div>
+  <div class="nav-sec"><div class="nav-lbl">Overview</div><button class="nav-btn active" data-sec="dashboard">Dashboard</button></div>
+  <div class="nav-sec"><div class="nav-lbl">Kitchen</div>
+    <button class="nav-btn" data-sec="ingredients">Ingredients</button>
+    <button class="nav-btn" data-sec="recipes">Recipe Library</button>
+    <button class="nav-btn" data-sec="builder">Recipe Builder</button>
+  </div>
+  <div class="nav-sec"><div class="nav-lbl">Business</div>
+    <button class="nav-btn" data-sec="menu">Menu Engineer</button>
+    <button class="nav-btn" data-sec="inventory">Inventory</button>
+    <button class="nav-btn" data-sec="cash">Daily Cash</button>
+    <button class="nav-btn" data-sec="finance">Finances</button>
+  </div>
+  <div class="nav-sec"><div class="nav-lbl">Tools</div>
+    <button class="nav-btn" data-sec="converter">Unit Converter</button>
+    <button class="nav-btn" data-sec="ai">AI Advisor</button>
+  </div>
+  <div class="sb-foot">All data saved locally on this device</div>
+</aside>
+
+<header class="topbar"><div class="tb-brand">La Cocina</div><button class="ham" id="ham"><span></span><span></span><span></span></button></header>
+<div class="d-overlay" id="doverlay"></div>
+
+<main class="main">
+
+<!-- DASHBOARD -->
+<section id="dashboard" class="section active">
+  <div class="phd"><div><div class="ptitle">Dashboard</div><div class="psub">Kitchen at a glance</div></div></div>
+  <div class="srow">
+    <div class="sc"><div class="slbl">Ingredients</div><div class="sval" id="d-ing">0</div></div>
+    <div class="sc"><div class="slbl">Recipes</div><div class="sval" id="d-rec">0</div></div>
+    <div class="sc"><div class="slbl">Avg Food Cost</div><div class="sval" id="d-fc">—</div><div class="ssub">target &lt;33%</div></div>
+    <div class="sc"><div class="slbl">Best Margin</div><div class="sval" id="d-bm">—</div><div class="ssub" id="d-bd">—</div></div>
+    <div class="sc"><div class="slbl">Low Stock</div><div class="sval" id="d-ls" style="color:var(--danger)">0</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px">
+    <div class="card"><div class="ctitle">Top Margin Dishes</div><div id="d-top"></div></div>
+    <div class="card"><div class="ctitle">Alerts</div><div id="d-alerts"></div></div>
+  </div>
+</section>
+
+<!-- INGREDIENTS -->
+<section id="ingredients" class="section">
+  <div class="phd"><div><div class="ptitle">Ingredients</div><div class="psub">Price database</div></div><button class="btn bp bsm" onclick="openM('mi')">Add Ingredient</button></div>
+  <div class="card" style="padding:9px 11px;margin-bottom:12px;"><input type="text" placeholder="Search ingredients…" oninput="renderIng(this.value)" style="border:none;background:transparent;box-shadow:none;"></div>
+  <div class="card" style="padding:0 0 2px;"><div class="tw" id="ing-wrap"><div class="empty"><p>No ingredients yet.</p></div></div></div>
+</section>
+
+<!-- RECIPES -->
+<section id="recipes" class="section">
+  <div class="phd"><div><div class="ptitle">Recipe Library</div></div><button class="btn bp bsm" onclick="goTo('builder')">New Recipe</button></div>
+  <div style="display:flex;gap:9px;margin-bottom:14px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:170px;"><input type="text" placeholder="Search…" oninput="renderLib(this.value)"></div>
+    <select style="width:auto" id="lib-cat" onchange="renderLib()"><option value="">All Categories</option><option>Appetizer</option><option>Soup</option><option>Salad</option><option>Main</option><option>Pasta</option><option>Dessert</option><option>Drink</option></select>
+  </div>
+  <div class="rgrid" id="rgrid"></div>
+</section>
+
+<!-- BUILDER -->
+<section id="builder" class="section">
+  <div class="phd"><div><div class="ptitle">Recipe Builder</div></div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap;">
+      <button class="btn bg bsm" onclick="clearB()">Clear</button>
+      <button class="btn bg bsm" onclick="window.print()">Print</button>
+      <button class="btn bsucc bsm" onclick="saveRec()">Save Recipe</button>
+    </div>
+  </div>
+  <div class="bgrid">
+    <div>
+      <div class="card"><div class="ctitle">Basic Info</div>
+        <div class="fg"><label>Recipe Name</label><input type="text" id="b-nm" placeholder="e.g. Pan-Seared Duck Breast"></div>
+        <div class="frow">
+          <div class="fg"><label>Category</label><select id="b-cat"><option>Main</option><option>Appetizer</option><option>Soup</option><option>Salad</option><option>Pasta</option><option>Dessert</option><option>Drink</option></select></div>
+          <div class="fg"><label>Servings</label><input type="number" id="b-sv" value="4" min="1" oninput="liveCalc()"></div>
+          <div class="fg"><label>Sale Price/srv (£)</label><input type="number" id="b-pr" placeholder="0.00" step="0.01" oninput="liveCalc()"></div>
+          <div class="fg"><label>Prep Time (min)</label><input type="number" id="b-pt" placeholder="30"></div>
+        </div>
+        <div class="fg"><label>Description</label><textarea id="b-ds" placeholder="Brief description…"></textarea></div>
+      </div>
+      <div class="card"><div class="ctitle">Ingredients</div>
+        <div style="display:grid;grid-template-columns:2fr 62px 62px 58px 26px;gap:5px;padding:0 2px;margin-bottom:5px;">
+          <span style="font-size:.63rem;color:var(--muted);text-transform:uppercase;">Ingredient</span>
+          <span style="font-size:.63rem;color:var(--muted);text-transform:uppercase;">Qty</span>
+          <span style="font-size:.63rem;color:var(--muted);text-transform:uppercase;">Unit</span>
+          <span style="font-size:.63rem;color:var(--muted);text-transform:uppercase;">Yield%</span>
+          <span></span>
+        </div>
+        <div id="b-irs"></div>
+        <button class="btn bg bsm" onclick="addIR()" style="margin-top:5px;">+ Add ingredient</button>
+      </div>
+      <div class="card"><div class="ctitle">Preparation Steps</div><ul class="slist" id="b-steps"></ul><button class="btn bg bsm" onclick="addStep()">+ Add step</button></div>
+      <div class="card"><div class="ctitle">Allergens</div><p style="font-size:.8rem;color:var(--muted);margin-bottom:9px;">Mark allergens present in this recipe.</p><div style="display:flex;flex-wrap:wrap;gap:6px;" id="b-alg"></div></div>
+    </div>
+    <div class="sticky-panel" style="position:sticky;top:18px;">
+      <div class="cpanel"><div class="ctitle">Live Cost</div>
+        <div class="ss"><label>Scale to</label><input type="number" id="b-sc" value="4" min="1" oninput="liveCalc()"><span style="font-size:.8rem;color:var(--muted)">servings</span></div>
+        <div id="b-bkd" style="margin-bottom:10px;"></div>
+        <div class="crow"><span style="color:var(--muted)">Total cost</span><span id="b-tot">£0.00</span></div>
+        <div class="crow" style="padding:8px 0 3px;border-top:none;"><span style="color:var(--muted)">Per serving</span><span class="cbig" id="b-per">£0.00</span></div>
+        <div id="b-pd" style="display:none;">
+          <hr class="divl">
+          <div class="crow"><span style="color:var(--muted)">Profit / serving</span><span id="b-pft" style="font-weight:600"></span></div>
+          <div class="crow"><span style="color:var(--muted)">Food cost %</span><span id="b-pct"></span></div>
+          <div class="pbar" style="margin-top:7px;"><div class="pbar-f" id="b-pb"></div></div>
+        </div>
+        <div id="b-tip" style="display:none;margin-top:10px;font-size:.76rem;color:var(--muted);background:var(--warm);padding:8px 10px;border-radius:7px;line-height:1.5;"></div>
+      </div>
+      <div class="card" style="margin-top:12px;"><div class="ctitle">Price Suggester</div>
+        <p style="font-size:.76rem;color:var(--muted);margin-bottom:9px;">Enter target food cost % to get suggested sale price.</p>
+        <div class="fg"><label>Target food cost %</label><input type="number" id="b-tpct" value="30" min="1" max="99" oninput="suggestP()"></div>
+        <div id="b-sug" style="font-family:'Cormorant Garamond',serif;font-size:1.55rem;color:var(--rust);margin-top:5px;"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MENU -->
+<section id="menu" class="section">
+  <div class="phd"><div><div class="ptitle">Menu Engineer</div><div class="psub">Profitability analysis</div></div></div>
+  <div class="srow">
+    <div class="sc"><div class="slbl">Menu Items</div><div class="sval" id="m-it">0</div></div>
+    <div class="sc"><div class="slbl">Avg Food Cost</div><div class="sval" id="m-avg">—</div></div>
+    <div class="sc"><div class="slbl">Star Dishes</div><div class="sval" id="m-st">0</div><div class="ssub">under 25%</div></div>
+    <div class="sc"><div class="slbl">Problem Items</div><div class="sval" id="m-pr" style="color:var(--danger)">0</div><div class="ssub">over 35%</div></div>
+  </div>
+  <div class="card"><div class="ctitle">Analysis</div><div class="tw"><div id="m-tbl"></div></div></div>
+  <div class="card"><div class="ctitle">Recommendations</div><div id="m-rec"><p style="font-size:.83rem;color:var(--muted)">Add recipes with sale prices to get recommendations.</p></div></div>
+</section>
+
+<!-- INVENTORY -->
+<section id="inventory" class="section">
+  <div class="phd"><div><div class="ptitle">Inventory</div><div class="psub">Stock tracking</div></div><button class="btn bp bsm" onclick="openM('minv')">Add Item</button></div>
+  <div class="srow">
+    <div class="sc"><div class="slbl">Items Tracked</div><div class="sval" id="i-tot">0</div></div>
+    <div class="sc"><div class="slbl">Low Stock</div><div class="sval" id="i-low" style="color:var(--danger)">0</div></div>
+    <div class="sc"><div class="slbl">Total Value</div><div class="sval" id="i-val">£0</div></div>
+  </div>
+  <div class="card" style="padding:0 0 2px;"><div class="tw" id="inv-wrap"><div class="empty"><p>No items yet.</p></div></div></div>
+</section>
+
+<!-- ═══ DAILY CASH ═══ -->
+<section id="cash" class="section">
+  <div class="phd"><div><div class="ptitle">Daily Cash</div><div class="psub">Count · Reconcile · Compare against bank</div></div></div>
+
+  <!-- Step 1 -->
+  <div class="card">
+    <div class="ctitle">Step 1 — Session Details</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+      <div class="fg" style="margin:0;flex:1;min-width:140px;"><label>Date</label><input type="date" id="c-date"></div>
+      <div class="fg" style="margin:0;flex:1;min-width:130px;"><label>Session</label><select id="c-sess"><option>Full Day</option><option>Lunch</option><option>Dinner</option><option>Takeaway</option></select></div>
+      <div class="fg" style="margin:0;flex:1;min-width:130px;"><label>Opening Float (£)</label><input type="number" id="c-float-in" placeholder="150.00" step="0.01" oninput="calcCash()"></div>
+      <div style="padding-bottom:10px;"><button class="btn bg bsm" onclick="clearCash()">Clear</button></div>
+    </div>
+  </div>
+
+  <!-- Step 2: Count -->
+  <div class="card">
+    <div class="ctitle">Step 2 — Count the Till</div>
+    <div class="dgrid">
+      <div class="dcard">
+        <div class="dtitle">Coins</div>
+        <div id="coin-rows"></div>
+        <hr class="divl">
+        <div class="drow"><div class="dlbl" style="font-weight:700;min-width:auto;flex:1;">Coins total</div><div class="dval" id="c-ctot" style="color:var(--brown);font-size:.95rem;">£0.00</div></div>
+      </div>
+      <div class="dcard">
+        <div class="dtitle">Notes</div>
+        <div id="note-rows"></div>
+        <hr class="divl">
+        <div class="drow"><div class="dlbl" style="font-weight:700;min-width:auto;flex:1;">Notes total</div><div class="dval" id="c-ntot" style="color:var(--brown);font-size:.95rem;">£0.00</div></div>
+      </div>
+      <div class="dcard">
+        <div class="dtitle">Card &amp; Other</div>
+        <div class="fg"><label>Card Terminal Z-Report Total (£)</label><input type="number" id="c-card" placeholder="0.00" step="0.01" oninput="calcCash()"></div>
+        <div class="fg"><label>Vouchers / Gift Cards (£)</label><input type="number" id="c-vouch" placeholder="0.00" step="0.01" oninput="calcCash()"></div>
+        <div class="fg"><label>Online / Delivery Platforms (£)</label><input type="number" id="c-online" placeholder="0.00" step="0.01" oninput="calcCash()"></div>
+        <div class="fg"><label>Closing Float (to keep in till) (£)</label><input type="number" id="c-float-out" placeholder="150.00" step="0.01" oninput="calcCash()"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Cross-check -->
+  <div class="card">
+    <div class="ctitle">Step 3 — Cross-Check Against POS &amp; Bank</div>
+    <p style="font-size:.8rem;color:var(--muted);margin-bottom:14px;">Enter your expected figures from the POS system and bank. The app will flag discrepancies immediately.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;">
+      <div class="fg"><label>Expected Total Sales — from POS (£)</label><input type="number" id="c-pos" placeholder="0.00" step="0.01" oninput="calcCash()"></div>
+      <div class="fg"><label>Expected Cash Deposit to Bank (£)<br><span style="font-size:.68rem;font-weight:400;text-transform:none;color:var(--muted-l);">(Net cash = till − opening float − closing float)</span></label><input type="number" id="c-bank-exp" placeholder="0.00" step="0.01" oninput="calcCash()"></div>
+      <div class="fg"><label>Actual Bank Deposit Confirmed (£)<br><span style="font-size:.68rem;font-weight:400;text-transform:none;color:var(--muted-l);">Fill once you've been to the bank</span></label><input type="number" id="c-bank-act" placeholder="0.00" step="0.01" oninput="calcCash()"></div>
+    </div>
+  </div>
+
+  <!-- Reconciliation Panel -->
+  <div class="ctp">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:20px;">
+
+      <div>
+        <div class="lbl">Gross Revenue Today</div>
+        <div class="val" id="c-grand">£0.00</div>
+        <div class="csr"><span>Cash in till</span><strong id="cs-grosstill">£0.00</strong></div>
+        <div class="csr"><span>Card (Z-report)</span><strong id="cs-card">£0.00</strong></div>
+        <div class="csr"><span>Vouchers</span><strong id="cs-vouch">£0.00</strong></div>
+        <div class="csr"><span>Online / delivery</span><strong id="cs-online">£0.00</strong></div>
+      </div>
+
+      <div>
+        <div class="lbl">Cash Reconciliation</div>
+        <div id="cs-cashvar" style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:700;margin-bottom:8px;">—</div>
+        <div class="csr"><span>Gross till count</span><strong id="cs-gross">£0.00</strong></div>
+        <div class="csr"><span>Less: opening float</span><strong id="cs-fin">—</strong></div>
+        <div class="csr"><span>Net cash taken</span><strong id="cs-net">—</strong></div>
+        <div class="csr"><span>Less: closing float</span><strong id="cs-fout">—</strong></div>
+        <div class="csr" style="opacity:1;"><span style="font-weight:600;">Cash to bank</span><strong id="cs-tobank" style="font-size:1rem;color:#F5E8C8;">—</strong></div>
+        <div id="cs-cashnote" style="font-size:.7rem;opacity:.5;margin-top:8px;line-height:1.5;"></div>
+      </div>
+
+      <div>
+        <div class="lbl">Bank Cross-Check</div>
+        <div id="cs-bankvar" style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:700;margin-bottom:8px;">—</div>
+        <div class="csr"><span>Cash to bank (calculated)</span><strong id="cs-bankexp2">—</strong></div>
+        <div class="csr"><span>Expected deposit entered</span><strong id="cs-bankexp">—</strong></div>
+        <div class="csr"><span>Actual deposit confirmed</span><strong id="cs-bankact">—</strong></div>
+        <div id="cs-banknote" style="font-size:.7rem;opacity:.5;margin-top:8px;line-height:1.5;"></div>
+        <hr style="border:none;border-top:1px solid rgba(255,255,255,.1);margin:10px 0">
+        <div class="lbl" style="margin-bottom:4px;">Sales vs POS</div>
+        <div id="cs-posvar" style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;">—</div>
+        <div id="cs-posnote" style="font-size:.7rem;opacity:.5;margin-top:4px;line-height:1.5;"></div>
+      </div>
+
+      <div>
+        <div class="lbl" style="margin-bottom:8px;">Payment Mix</div>
+        <div style="font-size:.73rem;opacity:.65;display:flex;justify-content:space-between;margin-bottom:2px;"><span>Cash</span><span id="pc-cash">—</span></div>
+        <div class="pbar" style="background:rgba(255,255,255,.12);margin-bottom:8px;"><div class="pbar-f" id="pb-cash" style="background:#F5E8C8;"></div></div>
+        <div style="font-size:.73rem;opacity:.65;display:flex;justify-content:space-between;margin-bottom:2px;"><span>Card</span><span id="pc-card">—</span></div>
+        <div class="pbar" style="background:rgba(255,255,255,.12);margin-bottom:8px;"><div class="pbar-f" id="pb-card" style="background:var(--gold);"></div></div>
+        <div style="font-size:.73rem;opacity:.65;display:flex;justify-content:space-between;margin-bottom:2px;"><span>Other</span><span id="pc-other">—</span></div>
+        <div class="pbar" style="background:rgba(255,255,255,.12);"><div class="pbar-f" id="pb-other" style="background:var(--olive-h);"></div></div>
+      </div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:9px;flex-wrap:wrap;">
+      <button class="btn bsm" style="background:rgba(255,255,255,.12);color:#F5E8C8;border:1px solid rgba(255,255,255,.2);" onclick="saveSess()">Save Session</button>
+      <button class="btn bsm" style="background:rgba(255,255,255,.12);color:#F5E8C8;border:1px solid rgba(255,255,255,.2);" onclick="exportCSV()">Export CSV</button>
+    </div>
+  </div>
+
+  <!-- Denomination Breakdown -->
+  <div class="card">
+    <div class="ctitle">Denomination Breakdown</div>
+    <div class="tw"><table style="min-width:0">
+      <thead><tr><th>Denomination</th><th>Count</th><th>Value</th></tr></thead>
+      <tbody id="denom-body"></tbody>
+      <tfoot><tr><td colspan="2" style="font-weight:600;padding:9px;">Total Cash in Till</td><td style="font-weight:700;color:var(--rust);padding:9px;" id="denom-tot">£0.00</td></tr></tfoot>
+    </table></div>
+  </div>
+
+  <!-- Session History -->
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+      <div class="ctitle" style="margin:0;">Reconciliation History</div>
+      <select id="c-log-filter" style="width:auto;font-size:.78rem;" onchange="renderClog()">
+        <option value="">All sessions</option><option value="ok">Balanced</option><option value="over">Over</option><option value="short">Short</option>
+      </select>
+    </div>
+    <div id="c-log"><div class="empty"><p>No sessions saved yet.</p></div></div>
+  </div>
+</section>
+
+<!-- ═══ FINANCES ═══ -->
+<section id="finance" class="section">
+  <div class="phd">
+    <div><div class="ptitle">Finances</div><div class="psub">P&amp;L · Expenses · Payroll · VAT · Breakeven</div></div>
+    <button class="btn bg bsm" onclick="exportFinCSV()">Export Report</button>
+  </div>
+
+  <div class="ftabs">
+    <button class="ftab active" onclick="showFtab('pnl',this)">P&amp;L Planner</button>
+    <button class="ftab" onclick="showFtab('expenses',this)">Expenses</button>
+    <button class="ftab" onclick="showFtab('payroll',this)">Payroll</button>
+    <button class="ftab" onclick="showFtab('vat',this)">VAT</button>
+    <button class="ftab" onclick="showFtab('breakeven',this)">Breakeven</button>
+  </div>
+
+  <!-- P&L -->
+  <div id="ftab-pnl" class="ftab-c active">
+    <div class="srow">
+      <div class="sc"><div class="slbl">Monthly Revenue</div><div class="sval" id="pnl-rev">—</div></div>
+      <div class="sc"><div class="slbl">Total Costs</div><div class="sval" id="pnl-costs">—</div></div>
+      <div class="sc"><div class="slbl">Net Profit</div><div class="sval" id="pnl-profit">—</div></div>
+      <div class="sc"><div class="slbl">Net Margin</div><div class="sval" id="pnl-margin">—</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;">
+      <div class="card"><div class="ctitle">Revenue</div>
+        <div class="fg"><label>Avg covers per day</label><input type="number" id="f-cv" placeholder="50" oninput="calcFin()"></div>
+        <div class="fg"><label>Avg spend / person (£)</label><input type="number" id="f-sp" placeholder="35" oninput="calcFin()"></div>
+        <div class="fg"><label>Days open / month</label><input type="number" id="f-dy" placeholder="26" oninput="calcFin()"></div>
+        <div class="fg"><label>Takeaway / delivery revenue (£)</label><input type="number" id="f-del" placeholder="0" oninput="calcFin()"></div>
+        <div class="fg"><label>Other revenue (£)</label><input type="number" id="f-ex" placeholder="0" oninput="calcFin()"></div>
+      </div>
+      <div class="card"><div class="ctitle">Cost of Sales</div>
+        <div class="fg"><label>Food &amp; bev cost %</label><input type="number" id="f-fp" placeholder="30" min="0" max="100" oninput="calcFin()"></div>
+        <div style="background:var(--warm);border-radius:7px;padding:8px 10px;margin-bottom:10px;"><div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">Calculated food cost</div><div id="f-fc-calc" style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:var(--rust);">—</div></div>
+      </div>
+      <div class="card"><div class="ctitle">Fixed Overheads</div>
+        <div class="fg"><label>Rent / lease (£)</label><input type="number" id="f-rn" placeholder="0" oninput="calcFin()"></div>
+        <div class="fg"><label>Utilities — gas, electric, water (£)</label><input type="number" id="f-ut" placeholder="0" oninput="calcFin()"></div>
+        <div class="fg"><label>Insurance (£)</label><input type="number" id="f-ins" placeholder="0" oninput="calcFin()"></div>
+        <div class="fg"><label>Software / subscriptions (£)</label><input type="number" id="f-sft" placeholder="0" oninput="calcFin()"></div>
+        <div class="fg"><label>Marketing &amp; advertising (£)</label><input type="number" id="f-mk" placeholder="0" oninput="calcFin()"></div>
+        <div class="fg"><label>Other fixed costs (£)</label><input type="number" id="f-ot" placeholder="0" oninput="calcFin()"></div>
+      </div>
+      <div class="card"><div class="ctitle">Labour</div>
+        <p style="font-size:.78rem;color:var(--muted);margin-bottom:10px;">Enter total monthly wages here, or use the Payroll tab to calculate automatically — then click Apply to P&amp;L.</p>
+        <div class="fg"><label>Total wages (£)</label><input type="number" id="f-wg" placeholder="0" oninput="calcFin()"></div>
+      </div>
+    </div>
+    <div class="card" id="f-res" style="display:none;"><div class="ctitle">Monthly P&amp;L Statement</div><div id="f-out"></div></div>
+  </div>
+
+  <!-- EXPENSES -->
+  <div id="ftab-expenses" class="ftab-c" style="display:none;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:9px;">
+      <div><div style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;color:var(--brown);">Expense Log</div><div class="psub">Track every business cost</div></div>
+      <button class="btn bp bsm" onclick="openM('mexp')">Add Expense</button>
+    </div>
+    <div class="srow">
+      <div class="sc"><div class="slbl">This Month</div><div class="sval" id="exp-month">£0</div></div>
+      <div class="sc"><div class="slbl">This Week</div><div class="sval" id="exp-week">£0</div></div>
+      <div class="sc"><div class="slbl">Top Category</div><div class="sval" id="exp-topcat" style="font-size:1rem;">—</div></div>
+      <div class="sc"><div class="slbl">Total Logged</div><div class="sval" id="exp-total">£0</div></div>
+    </div>
+    <div class="card">
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+        <select id="exp-fcat" style="width:auto;font-size:.8rem;" onchange="renderExp()">
+          <option value="">All Categories</option>
+          <option>Food &amp; Beverage</option><option>Labour</option><option>Rent</option><option>Utilities</option>
+          <option>Repairs &amp; Maintenance</option><option>Marketing</option><option>Equipment</option>
+          <option>Insurance</option><option>Professional Fees</option><option>Other</option>
+        </select>
+        <select id="exp-fmon" style="width:auto;font-size:.8rem;" onchange="renderExp()"><option value="">All time</option></select>
+      </div>
+      <div class="tw" id="exp-wrap"><div class="empty"><p>No expenses logged yet.</p></div></div>
+    </div>
+    <div class="card"><div class="ctitle">Spending by Category</div><div id="exp-chart" class="barchart"></div></div>
+  </div>
+
+  <!-- PAYROLL -->
+  <div id="ftab-payroll" class="ftab-c" style="display:none;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:9px;">
+      <div><div style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;color:var(--brown);">Payroll</div></div>
+      <button class="btn bp bsm" onclick="openM('mstaff')">Add Staff Member</button>
+    </div>
+    <div class="srow">
+      <div class="sc"><div class="slbl">Total Staff</div><div class="sval" id="pay-cnt">0</div></div>
+      <div class="sc"><div class="slbl">Weekly Hours</div><div class="sval" id="pay-hrs">0</div></div>
+      <div class="sc"><div class="slbl">Weekly Wages</div><div class="sval" id="pay-wk">£0</div></div>
+      <div class="sc"><div class="slbl">Monthly Wages</div><div class="sval" id="pay-mo">£0</div></div>
+    </div>
+    <div class="card"><div class="tw" id="staff-wrap"><div class="empty"><p>No staff added yet.</p></div></div></div>
+    <div class="card" style="background:var(--warm);border-color:var(--border);">
+      <p style="font-size:.8rem;color:var(--muted);">Monthly total will be applied to the Labour field in the P&amp;L Planner.</p>
+      <button class="btn bp bsm" style="margin-top:10px;" onclick="applyPayroll()">Apply to P&amp;L</button>
+    </div>
+  </div>
+
+  <!-- VAT -->
+  <div id="ftab-vat" class="ftab-c" style="display:none;">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;">
+      <div class="card"><div class="ctitle">VAT Calculator</div>
+        <p style="font-size:.8rem;color:var(--muted);margin-bottom:12px;">UK standard rate is 20%. Hospitality may qualify for a reduced rate — always confirm with your accountant.</p>
+        <div class="fg"><label>VAT Rate</label><select id="vat-rate" onchange="calcVAT()"><option value="20">20% — Standard rate</option><option value="12.5">12.5% — Hospitality reduced</option><option value="0">0% — Zero rated</option></select></div>
+        <div class="fg"><label>Amount (£)</label><input type="number" id="vat-amt" placeholder="0.00" step="0.01" oninput="calcVAT()"></div>
+        <div class="fg"><label>Amount is…</label><select id="vat-dir" onchange="calcVAT()"><option value="ex">Ex-VAT (add VAT on top)</option><option value="inc">Inc-VAT (extract VAT from total)</option></select></div>
+        <div id="vat-result" style="background:var(--warm);border-radius:9px;padding:14px 16px;margin-top:4px;font-size:.82rem;color:var(--muted);">Enter an amount above.</div>
+      </div>
+      <div class="card"><div class="ctitle">Quarterly VAT Estimate</div>
+        <p style="font-size:.8rem;color:var(--muted);margin-bottom:12px;">Estimate your quarterly VAT liability.</p>
+        <div class="fg"><label>Monthly VAT-able revenue (£)</label><input type="number" id="vat-rev" placeholder="0" oninput="calcVATQ()"></div>
+        <div class="fg"><label>Monthly VAT-able purchases (£)</label><input type="number" id="vat-pur" placeholder="0" oninput="calcVATQ()"></div>
+        <div class="fg"><label>VAT rate (%)</label><input type="number" id="vat-qrate" value="20" oninput="calcVATQ()"></div>
+        <div id="vat-q-result" style="background:var(--warm);border-radius:9px;padding:14px 16px;margin-top:4px;font-size:.82rem;color:var(--muted);">Enter figures above.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BREAKEVEN -->
+  <div id="ftab-breakeven" class="ftab-c" style="display:none;">
+    <div class="card"><div class="ctitle">Breakeven Analysis</div>
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:14px;">Calculated from your P&amp;L Planner figures. Fill those in first.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;">
+        <div class="sc"><div class="slbl">Covers / day to break even</div><div class="sval" id="be-cov" style="color:var(--rust);">—</div></div>
+        <div class="sc"><div class="slbl">Revenue needed / day</div><div class="sval" id="be-rev">—</div></div>
+        <div class="sc"><div class="slbl">Break-even day of month</div><div class="sval" id="be-day">—</div></div>
+        <div class="sc"><div class="slbl">Contribution margin / cover</div><div class="sval" id="be-cm">—</div></div>
+      </div>
+      <div id="be-detail" style="font-size:.82rem;color:var(--muted);line-height:1.8;margin-top:14px;padding:12px 14px;background:var(--warm);border-radius:8px;"></div>
+    </div>
+    <div class="card"><div class="ctitle">What-If Scenarios</div>
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:12px;">See how changes to your numbers affect breakeven. Leave blank to use P&amp;L values.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:10px;">
+        <div class="fg"><label>If avg spend increases to (£)</label><input type="number" id="wi-spend" placeholder="e.g. 40" oninput="calcWhatIf()"></div>
+        <div class="fg"><label>If fixed costs cut by (£/month)</label><input type="number" id="wi-save" placeholder="e.g. 500" oninput="calcWhatIf()"></div>
+        <div class="fg"><label>If food cost % reduces to</label><input type="number" id="wi-fc" placeholder="e.g. 28" oninput="calcWhatIf()"></div>
+      </div>
+      <div id="wi-result" style="font-size:.85rem;color:var(--muted);margin-top:8px;"></div>
+    </div>
+  </div>
+
+</section>
+
+<!-- CONVERTER -->
+<section id="converter" class="section">
+  <div class="phd"><div><div class="ptitle">Unit Converter</div></div></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;">
+    <div class="card"><div class="ctitle">Weight &amp; Volume</div>
+      <div class="fg"><label>Amount</label><input type="number" id="cv-a" placeholder="1" oninput="doConv()"></div>
+      <div class="frow">
+        <div class="fg"><label>From</label><select id="cv-f" onchange="doConv()"><optgroup label="Weight"><option value="kg">kg</option><option value="g">g</option><option value="lb">lb</option><option value="oz">oz</option></optgroup><optgroup label="Volume"><option value="liter">liter</option><option value="ml">ml</option><option value="gallon">gallon</option><option value="quart">quart</option><option value="pint">pint</option><option value="cup">cup</option><option value="floz">fl oz</option><option value="tbsp">tbsp</option><option value="tsp">tsp</option></optgroup></select></div>
+        <div class="fg"><label>To</label><select id="cv-t" onchange="doConv()"><optgroup label="Weight"><option value="g">g</option><option value="kg">kg</option><option value="lb">lb</option><option value="oz">oz</option></optgroup><optgroup label="Volume"><option value="ml">ml</option><option value="liter">liter</option><option value="gallon">gallon</option><option value="quart">quart</option><option value="pint">pint</option><option value="cup">cup</option><option value="floz">fl oz</option><option value="tbsp">tbsp</option><option value="tsp">tsp</option></optgroup></select></div>
+      </div>
+      <div id="cv-r" style="font-family:'Cormorant Garamond',serif;font-size:1.9rem;color:var(--rust);margin-top:3px;"></div>
+    </div>
+    <div class="card"><div class="ctitle">Recipe Scaling</div>
+      <div class="frow"><div class="fg"><label>Original servings</label><input type="number" id="sc-o" placeholder="4" oninput="doScale()"></div><div class="fg"><label>Target servings</label><input type="number" id="sc-t" placeholder="12" oninput="doScale()"></div></div>
+      <div class="fg"><label>Quantity (e.g. 200 g)</label><input type="text" id="sc-q" placeholder="200 g" oninput="doScale()"></div>
+      <div id="sc-r" style="font-family:'Cormorant Garamond',serif;font-size:1.9rem;color:var(--rust);margin-top:3px;"></div>
+    </div>
+    <div class="card"><div class="ctitle">Temperature</div>
+      <div class="frow"><div class="fg"><label>Celsius (°C)</label><input type="number" id="tc" placeholder="180" oninput="convT('c')"></div><div class="fg"><label>Fahrenheit (°F)</label><input type="number" id="tf" placeholder="356" oninput="convT('f')"></div></div>
+      <div id="t-desc" style="font-size:.8rem;color:var(--muted);margin-top:3px;"></div>
+    </div>
+    <div class="card"><div class="ctitle">Quick Reference</div>
+      <div class="tw"><table style="min-width:0"><thead><tr><th>From</th><th>To</th><th>Equals</th></tr></thead><tbody>
+        <tr><td>1 cup</td><td>ml</td><td>240 ml</td></tr><tr><td>1 tbsp</td><td>ml</td><td>15 ml</td></tr>
+        <tr><td>1 tsp</td><td>ml</td><td>5 ml</td></tr><tr><td>1 lb</td><td>g</td><td>453.6 g</td></tr>
+        <tr><td>1 oz</td><td>g</td><td>28.35 g</td></tr><tr><td>1 gallon</td><td>L</td><td>3.785 L</td></tr>
+        <tr><td>1 pint</td><td>ml</td><td>473 ml</td></tr>
+      </tbody></table></div>
+    </div>
+  </div>
+</section>
+
+<!-- AI -->
+<section id="ai" class="section">
+  <div class="phd"><div><div class="ptitle">AI Chef Advisor</div><div class="psub">Ask anything about your restaurant</div></div></div>
+  <div class="card"><div class="ctitle">Chat</div>
+    <p style="font-size:.8rem;color:var(--muted);margin-bottom:10px;">Ask about pricing, food costs, recipes, kitchen management — anything.</p>
+    <div style="display:flex;flex-direction:column;height:330px;">
+      <div style="flex:1;overflow-y:auto;padding:10px;background:var(--warm);border-radius:8px;margin-bottom:9px;-webkit-overflow-scrolling:touch;" id="chat-msgs">
+        <div><div style="display:inline-block;padding:8px 12px;font-size:.83rem;max-width:85%;white-space:pre-wrap;line-height:1.5;border-radius:12px 12px 12px 2px;background:var(--card);border:1px solid var(--border)">Hello Chef! Ask me about food costs, menu pricing, recipes, or anything about running your restaurant.</div></div>
+      </div>
+      <div style="display:flex;gap:8px;"><input type="text" id="chat-in" placeholder="Ask anything…" onkeydown="if(event.key==='Enter')sendChat()" style="flex:1;"><button class="btn bp" onclick="sendChat()">Send</button></div>
+    </div>
+    <div style="margin-top:11px;display:flex;flex-wrap:wrap;gap:6px;">
+      <button class="btn bg bxs" onclick="qchat('What is a good food cost % target for a restaurant?')">Food cost targets</button>
+      <button class="btn bg bxs" onclick="qchat('How do I calculate ideal menu price from food cost?')">Pricing formula</button>
+      <button class="btn bg bxs" onclick="qchat('How can I reduce food waste in my kitchen?')">Reduce waste</button>
+      <button class="btn bg bxs" onclick="qchat('What dishes typically have the best profit margins?')">High-margin dishes</button>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bnav"><div class="bnav-in">
+  <button class="bb active" data-sec="dashboard"><div class="bdot"></div>Home</button>
+  <button class="bb" data-sec="builder">Builder</button>
+  <button class="bb" data-sec="cash">Cash</button>
+  <button class="bb" data-sec="finance">Finance</button>
+  <button class="bb" data-sec="menu">Menu</button>
+</div></nav>
+
+<!-- MODALS -->
+<div class="mwrap" id="mi"><div class="modal">
+  <div class="mhd"><div class="mtitle">Add Ingredient</div><button class="mclose" onclick="closeM('mi')">✕</button></div>
+  <div class="fg"><label>Name</label><input type="text" id="i-nm" placeholder="e.g. Chicken breast"></div>
+  <div class="frow">
+    <div class="fg"><label>Cost (£)</label><input type="number" id="i-co" step="0.01" min="0" placeholder="0.00"></div>
+    <div class="fg"><label>Package Qty</label><input type="number" id="i-qt" step="0.01" min="0" placeholder="1"></div>
+    <div class="fg"><label>Unit</label><select id="i-un"><option>kg</option><option>lb</option><option>g</option><option>oz</option><option>liter</option><option>ml</option><option>cup</option><option>each</option><option>dozen</option><option>bunch</option></select></div>
+  </div>
+  <div class="frow">
+    <div class="fg"><label>Category</label><select id="i-ca"><option>Protein</option><option>Produce</option><option>Dairy</option><option>Grain</option><option>Spice</option><option>Oil &amp; Fat</option><option>Sauce</option><option>Other</option></select></div>
+    <div class="fg"><label>Yield % (after trim)</label><input type="number" id="i-yl" value="100" min="1" max="200"></div>
+  </div>
+  <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px;">
+    <button class="btn bg" onclick="closeM('mi')">Cancel</button><button class="btn bp" onclick="addIng()">Add</button>
+  </div>
+</div></div>
+
+<div class="mwrap" id="mrec"><div class="modal" style="max-width:660px;">
+  <div class="mhd"><div class="mtitle" id="rd-t">Recipe</div><button class="mclose" onclick="closeM('mrec')">✕</button></div>
+  <div id="rd-c"></div>
+  <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap;">
+    <button class="btn bg bsm" onclick="window.print()">Print</button>
+    <button class="btn bdng bsm" id="rd-del">Delete</button>
+    <button class="btn bp bsm" onclick="closeM('mrec')">Close</button>
+  </div>
+</div></div>
+
+<div class="mwrap" id="minv"><div class="modal">
+  <div class="mhd"><div class="mtitle">Add Inventory Item</div><button class="mclose" onclick="closeM('minv')">✕</button></div>
+  <div class="fg"><label>Item name</label><input type="text" id="iv-nm" placeholder="e.g. Chicken breast"></div>
+  <div class="frow">
+    <div class="fg"><label>Current stock</label><input type="number" id="iv-st" step="0.1" placeholder="0"></div>
+    <div class="fg"><label>Unit</label><select id="iv-un"><option>kg</option><option>lb</option><option>g</option><option>liter</option><option>each</option><option>dozen</option><option>box</option></select></div>
+    <div class="fg"><label>Minimum level</label><input type="number" id="iv-mn" step="0.1" placeholder="2"></div>
+  </div>
+  <div class="fg"><label>Cost per unit (£)</label><input type="number" id="iv-co" step="0.01" placeholder="0.00"></div>
+  <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px;">
+    <button class="btn bg" onclick="closeM('minv')">Cancel</button><button class="btn bp" onclick="addInv()">Add</button>
+  </div>
+</div></div>
+
+<div class="mwrap" id="mexp"><div class="modal">
+  <div class="mhd"><div class="mtitle">Add Expense</div><button class="mclose" onclick="closeM('mexp')">✕</button></div>
+  <div class="fg"><label>Description</label><input type="text" id="ex-desc" placeholder="e.g. Gas bill — February"></div>
+  <div class="frow">
+    <div class="fg"><label>Amount (£)</label><input type="number" id="ex-amt" step="0.01" placeholder="0.00"></div>
+    <div class="fg"><label>Date</label><input type="date" id="ex-date"></div>
+  </div>
+  <div class="frow">
+    <div class="fg"><label>Category</label><select id="ex-cat"><option>Food &amp; Beverage</option><option>Labour</option><option>Rent</option><option>Utilities</option><option>Repairs &amp; Maintenance</option><option>Marketing</option><option>Equipment</option><option>Insurance</option><option>Professional Fees</option><option>Other</option></select></div>
+    <div class="fg"><label>Payment method</label><select id="ex-pay"><option>Bank Transfer</option><option>Direct Debit</option><option>Cash</option><option>Card</option><option>Other</option></select></div>
+  </div>
+  <div class="fg"><label>Notes (optional)</label><textarea id="ex-note" rows="2" placeholder="Any additional notes…"></textarea></div>
+  <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px;">
+    <button class="btn bg" onclick="closeM('mexp')">Cancel</button><button class="btn bp" onclick="addExp()">Add Expense</button>
+  </div>
+</div></div>
+
+<div class="mwrap" id="mstaff"><div class="modal">
+  <div class="mhd"><div class="mtitle">Add Staff Member</div><button class="mclose" onclick="closeM('mstaff')">✕</button></div>
+  <div class="fg"><label>Name</label><input type="text" id="st-nm" placeholder="e.g. Maria"></div>
+  <div class="frow">
+    <div class="fg"><label>Role</label><select id="st-role"><option>Head Chef</option><option>Sous Chef</option><option>Chef de Partie</option><option>Kitchen Porter</option><option>Waiter / Waitress</option><option>Front of House Manager</option><option>Bar Staff</option><option>Manager</option><option>Other</option></select></div>
+    <div class="fg"><label>Contract type</label><select id="st-type"><option value="hourly">Hourly</option><option value="salary">Monthly Salary</option></select></div>
+  </div>
+  <div class="frow">
+    <div class="fg"><label>Hourly rate or Monthly salary (£)</label><input type="number" id="st-rate" step="0.01" placeholder="0.00"></div>
+    <div class="fg"><label>Hours / week (if hourly)</label><input type="number" id="st-hrs" step="0.5" placeholder="40"></div>
+  </div>
+  <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px;">
+    <button class="btn bg" onclick="closeM('mstaff')">Cancel</button><button class="btn bp" onclick="addStaff()">Add</button>
+  </div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+// ── STATE ──
+let ings  = JSON.parse(localStorage.getItem('lcp_i')||'[]');
+let recs  = JSON.parse(localStorage.getItem('lcp_r')||'[]');
+let inv   = JSON.parse(localStorage.getItem('lcp_v')||'[]');
+let clog  = JSON.parse(localStorage.getItem('lcp_c')||'[]');
+let exps  = JSON.parse(localStorage.getItem('lcp_e')||'[]');
+let staff = JSON.parse(localStorage.getItem('lcp_s')||'[]');
+const ALG = ['Gluten','Dairy','Eggs','Nuts','Peanuts','Shellfish','Fish','Soy','Sesame'];
+let aAlg=new Set(), bRows=[], stepN=0, chatH=[];
+
+function save(){
+  localStorage.setItem('lcp_i',JSON.stringify(ings));
+  localStorage.setItem('lcp_r',JSON.stringify(recs));
+  localStorage.setItem('lcp_v',JSON.stringify(inv));
+  localStorage.setItem('lcp_c',JSON.stringify(clog));
+  localStorage.setItem('lcp_e',JSON.stringify(exps));
+  localStorage.setItem('lcp_s',JSON.stringify(staff));
+}
+
+// ── NAV ──
+function goTo(sec){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('[data-sec]').forEach(b=>b.classList.remove('active'));
+  const el=document.getElementById(sec); if(el)el.classList.add('active');
+  document.querySelectorAll(`[data-sec="${sec}"]`).forEach(b=>b.classList.add('active'));
+  closeSB();
+  ({dashboard:renderDash, ingredients:renderIng, recipes:()=>renderLib(), builder:initB,
+    menu:renderMenu, inventory:renderInv, cash:renderClog, finance:()=>{calcFin();renderExp();renderPayroll();}
+  })[sec]?.();
+}
+document.querySelectorAll('[data-sec]').forEach(b=>b.addEventListener('click',()=>goTo(b.dataset.sec)));
+const sb=document.getElementById('sidebar'), dov=document.getElementById('doverlay');
+document.getElementById('ham').addEventListener('click',()=>{sb.classList.toggle('open');dov.classList.toggle('open');});
+dov.addEventListener('click',closeSB);
+function closeSB(){sb.classList.remove('open');dov.classList.remove('open');}
+
+// ── MODAL ──
+function openM(id){document.getElementById(id).classList.add('open');}
+function closeM(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.mwrap').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+
+// ── TOAST ──
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+// ── HELPERS ──
+function fmtGBP(n){return'£'+n.toFixed(2);}
+function fmt(n){return n.toLocaleString('en-GB',{maximumFractionDigits:0});}
+
+// ── INGREDIENTS ──
+function addIng(){
+  const nm=document.getElementById('i-nm').value.trim();
+  const co=parseFloat(document.getElementById('i-co').value);
+  const qt=parseFloat(document.getElementById('i-qt').value);
+  const un=document.getElementById('i-un').value;
+  const ca=document.getElementById('i-ca').value;
+  const yl=parseFloat(document.getElementById('i-yl').value)||100;
+  if(!nm||isNaN(co)||isNaN(qt)||qt<=0){alert('Please fill all fields.');return;}
+  ings.push({id:Date.now(),nm,co,qt,un,ca,yl,cpu:co/qt});
+  save(); renderIng(); closeM('mi');
+  ['i-nm','i-co','i-qt'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('i-yl').value='100';
+  toast(`"${nm}" added`);
+}
+function delIng(id){if(!confirm('Delete?'))return;ings=ings.filter(i=>i.id!==id);save();renderIng();}
+function renderIng(f=''){
+  const w=document.getElementById('ing-wrap');
+  const l=ings.filter(i=>i.nm.toLowerCase().includes(f.toLowerCase()));
+  if(!l.length){w.innerHTML='<div class="empty"><p>'+(f?'No results.':'No ingredients yet.')+'</p></div>';return;}
+  w.innerHTML=`<table><thead><tr><th>Name</th><th>Cat</th><th>Package</th><th>Cost</th><th>Per unit</th><th>Yield%</th><th>Eff. Cost</th><th></th></tr></thead>
+  <tbody>${l.map(i=>{const eff=i.cpu/(i.yl/100);return`<tr>
+    <td><strong>${i.nm}</strong></td><td><span class="badge bg2">${i.ca}</span></td>
+    <td>${i.qt} ${i.un}</td><td>${fmtGBP(i.co)}</td><td>${fmtGBP(i.cpu)}/${i.un}</td>
+    <td>${i.yl}%</td><td style="color:var(--rust);font-weight:500">${fmtGBP(eff)}/${i.un}</td>
+    <td><button class="del-btn" onclick="delIng(${i.id})">✕</button></td></tr>`;}).join('')}</tbody></table>`;
+}
+
+// ── BUILDER ──
+function initB(){renderAlg();const sv=document.getElementById('b-sc');if(!sv.value||sv.value==='0')sv.value=document.getElementById('b-sv').value||4;liveCalc();}
+function renderAlg(){document.getElementById('b-alg').innerHTML=ALG.map(a=>`<span class="tag ${aAlg.has(a)?'active':''}" onclick="togAlg('${a}')">${a}</span>`).join('');}
+function togAlg(a){if(aAlg.has(a))aAlg.delete(a);else aAlg.add(a);renderAlg();}
+function addIR(){
+  const id=Date.now(); bRows.push(id);
+  const w=document.getElementById('b-irs');
+  const d=document.createElement('div'); d.id='ir-'+id;
+  d.style.cssText='display:grid;grid-template-columns:2fr 62px 62px 58px 26px;gap:5px;margin-bottom:5px;';
+  d.innerHTML=`<select id="rs-${id}" onchange="onRS(${id})"><option value="">— select —</option>${ings.map(i=>`<option value="${i.id}">${i.nm} (${i.un})</option>`).join('')}</select>
+    <input type="number" id="rq-${id}" placeholder="0" step="0.01" oninput="liveCalc()">
+    <input type="text" id="ru-${id}" readonly style="background:var(--warm);color:var(--muted);" placeholder="unit">
+    <input type="number" id="ry-${id}" value="100" min="1" max="200" oninput="liveCalc()" title="Yield%">
+    <button class="del-btn" onclick="remIR(${id})" style="align-self:center;">✕</button>`;
+  w.appendChild(d);
+}
+function onRS(id){const i=ings.find(x=>x.id==document.getElementById('rs-'+id).value);if(i){document.getElementById('ru-'+id).value=i.un;document.getElementById('ry-'+id).value=i.yl||100;}liveCalc();}
+function remIR(id){document.getElementById('ir-'+id)?.remove();bRows=bRows.filter(r=>r!==id);liveCalc();}
+function addStep(){stepN++;const ul=document.getElementById('b-steps');const li=document.createElement('li');li.className='sli';li.id='sl-'+stepN;li.innerHTML=`<div class="snum">${stepN}</div><div style="flex:1;"><textarea rows="2" placeholder="Describe step…" id="st-${stepN}"></textarea></div><button class="del-btn" onclick="document.getElementById('sl-${stepN}').remove()" style="margin-top:3px;">✕</button>`;ul.appendChild(li);}
+function liveCalc(){
+  const sv=parseFloat(document.getElementById('b-sv').value)||1;
+  const sc=parseFloat(document.getElementById('b-sc').value)||sv;
+  const sf=sc/sv; const pr=parseFloat(document.getElementById('b-pr').value)||0;
+  let tot=0,lines=[];
+  bRows.forEach(id=>{if(!document.getElementById('ir-'+id))return;const iid=document.getElementById('rs-'+id)?.value;const qt=parseFloat(document.getElementById('rq-'+id)?.value)||0;const yl=parseFloat(document.getElementById('ry-'+id)?.value)||100;const ing=ings.find(i=>i.id==iid);if(ing&&qt>0){const sq=qt*sf;const c=ing.cpu*sq*(100/yl);tot+=c;lines.push(`<div style="display:flex;justify-content:space-between;font-size:.75rem;padding:2px 0;"><span style="color:var(--muted)">${ing.nm} (${sq.toFixed(2)} ${ing.un})</span><span>${fmtGBP(c)}</span></div>`);}});
+  const per=sc>0?tot/sc:0;
+  document.getElementById('b-tot').textContent=fmtGBP(tot);
+  document.getElementById('b-per').textContent=fmtGBP(per);
+  document.getElementById('b-bkd').innerHTML=lines.length?lines.join(''):'<p style="font-size:.76rem;color:var(--muted-l)">Add ingredients above.</p>';
+  const pd=document.getElementById('b-pd'),tp=document.getElementById('b-tip');
+  if(pr>0){
+    pd.style.display='block';
+    const pct=(per/pr)*100,pft=pr-per;
+    document.getElementById('b-pft').textContent=fmtGBP(pft);
+    document.getElementById('b-pft').style.color=pft>=0?'var(--olive)':'var(--danger)';
+    const cls=pct<25?'bgrn':pct<33?'byel':'bred';
+    document.getElementById('b-pct').innerHTML=`<span class="badge ${cls}">${pct.toFixed(1)}%</span>`;
+    const pb=document.getElementById('b-pb');pb.style.width=Math.min(pct,100)+'%';pb.style.background=pct<25?'var(--olive)':pct<33?'var(--gold)':'var(--danger)';
+    tp.style.display='block';tp.textContent=pct<20?'Excellent margin.':pct<28?'Good margin.':pct<33?'Getting tight. Consider a price increase.':`High cost. For 30% target, price should be ${fmtGBP(per/0.30)}.`;
+  }else{pd.style.display='none';tp.style.display='none';}
+  suggestP();
+}
+function suggestP(){
+  const sv=parseFloat(document.getElementById('b-sv').value)||1;const sc=parseFloat(document.getElementById('b-sc').value)||sv;const sf=sc/sv;const tp=parseFloat(document.getElementById('b-tpct').value)||30;
+  let tot=0;bRows.forEach(id=>{if(!document.getElementById('ir-'+id))return;const iid=document.getElementById('rs-'+id)?.value;const qt=parseFloat(document.getElementById('rq-'+id)?.value)||0;const yl=parseFloat(document.getElementById('ry-'+id)?.value)||100;const ing=ings.find(i=>i.id==iid);if(ing&&qt>0)tot+=ing.cpu*qt*sf*(100/yl);});
+  const per=sc>0?tot/sc:0;
+  document.getElementById('b-sug').textContent=per>0&&tp>0?fmtGBP(per/(tp/100))+' / serving':'';
+}
+function clearB(){['b-nm','b-ds','b-pr','b-pt'].forEach(id=>document.getElementById(id).value='');document.getElementById('b-sv').value='4';document.getElementById('b-sc').value='4';document.getElementById('b-irs').innerHTML='';document.getElementById('b-steps').innerHTML='';bRows=[];stepN=0;aAlg.clear();renderAlg();liveCalc();}
+function saveRec(){
+  const nm=document.getElementById('b-nm').value.trim();if(!nm){alert('Enter a recipe name.');return;}
+  const sv=parseFloat(document.getElementById('b-sv').value)||1;const pr=parseFloat(document.getElementById('b-pr').value)||0;
+  const cat=document.getElementById('b-cat').value;const ds=document.getElementById('b-ds').value.trim();const pt=document.getElementById('b-pt').value;
+  let tot=0,il=[];bRows.forEach(id=>{if(!document.getElementById('ir-'+id))return;const iid=document.getElementById('rs-'+id)?.value;const qt=parseFloat(document.getElementById('rq-'+id)?.value)||0;const yl=parseFloat(document.getElementById('ry-'+id)?.value)||100;const un=document.getElementById('ru-'+id)?.value;const ing=ings.find(i=>i.id==iid);if(ing&&qt>0){const c=ing.cpu*qt*(100/yl);tot+=c;il.push({nm:ing.nm,qt,un,yl,co:c});}});
+  let steps=[];document.querySelectorAll('[id^="st-"]').forEach(el=>{if(el.value.trim())steps.push(el.value.trim());});
+  const per=tot/sv;const pct=pr>0?(per/pr)*100:null;
+  recs=recs.filter(r=>r.nm!==nm);recs.push({nm,tot,per,pr,pct,sv,cat,ds,pt,il,steps,alg:[...aAlg],dt:new Date().toLocaleDateString()});
+  save();toast(`"${nm}" saved`);renderLib();renderDash();
+}
+
+// ── LIBRARY ──
+function renderLib(f='',cat=''){
+  cat=cat||document.getElementById('lib-cat')?.value||'';
+  const g=document.getElementById('rgrid');
+  const l=recs.filter(r=>r.nm.toLowerCase().includes((f||'').toLowerCase())&&(!cat||r.cat===cat));
+  if(!l.length){g.innerHTML='<div class="empty" style="grid-column:1/-1;padding:48px"><p>No recipes found.</p></div>';return;}
+  g.innerHTML=l.map(r=>{const cls=r.pct?(r.pct<30?'bgrn':r.pct<35?'byel':'bred'):'bg2';return`<div class="rcard" onclick="openRD('${r.nm.replace(/'/g,"\\'")}')"><div class="rcard-h"><span>${r.cat}</span></div><div class="rcard-b"><div class="rcard-n">${r.nm}</div><div class="rcard-m">${r.sv} servings${r.pt?' · '+r.pt+' min':''}</div><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:600;color:var(--rust)">${fmtGBP(r.per)}/srv</span>${r.pct!==null?`<span class="badge ${cls}">${r.pct.toFixed(0)}% cost</span>`:'<span class="badge bg2">No price</span>'}</div></div></div>`;}).join('');
+}
+function openRD(nm){
+  const r=recs.find(x=>x.nm===nm);if(!r)return;
+  document.getElementById('rd-t').textContent=r.nm;
+  document.getElementById('rd-del').onclick=()=>{if(!confirm('Delete?'))return;recs=recs.filter(x=>x.nm!==nm);save();renderLib();renderDash();closeM('mrec');toast('Deleted');};
+  const cls=r.pct?(r.pct<30?'bgrn':r.pct<35?'byel':'bred'):'bg2';
+  let h=`<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;"><span class="badge bg2">${r.cat}</span><span class="badge bg2">${r.sv} servings</span>${r.pt?`<span class="badge bg2">${r.pt} min</span>`:''} ${(r.alg||[]).map(a=>`<span class="badge bred">${a}</span>`).join('')}</div>${r.ds?`<p style="font-size:.83rem;color:var(--muted);margin-bottom:12px;">${r.ds}</p>`:''}
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:9px;margin-bottom:14px;">
+    <div class="sc"><div class="slbl">Cost/serving</div><div class="sval" style="color:var(--rust)">${fmtGBP(r.per)}</div></div>
+    ${r.pr>0?`<div class="sc"><div class="slbl">Sale price</div><div class="sval">${fmtGBP(r.pr)}</div></div><div class="sc"><div class="slbl">Food cost</div><div class="sval"><span class="badge ${cls}">${r.pct.toFixed(1)}%</span></div></div><div class="sc"><div class="slbl">Profit/srv</div><div class="sval" style="color:var(--olive)">${fmtGBP(r.pr-r.per)}</div></div>`:''}
+  </div>`;
+  if(r.il?.length)h+=`<div class="ctitle" style="font-size:.88rem;margin-bottom:7px;">Ingredients</div><div class="tw"><table style="margin-bottom:14px;"><thead><tr><th>Ingredient</th><th>Qty</th><th>Unit</th><th>Yield%</th><th>Cost</th></tr></thead><tbody>${r.il.map(i=>`<tr><td>${i.nm}</td><td>${i.qt}</td><td>${i.un}</td><td>${i.yl}%</td><td>${fmtGBP(i.co)}</td></tr>`).join('')}</tbody></table></div>`;
+  if(r.steps?.length)h+=`<div class="ctitle" style="font-size:.88rem;margin-bottom:9px;">Preparation</div><ol class="slist">${r.steps.map((s,i)=>`<li class="sli"><div class="snum">${i+1}</div><div style="padding-top:2px;font-size:.85rem;line-height:1.55;">${s}</div></li>`).join('')}</ol>`;
+  document.getElementById('rd-c').innerHTML=h;openM('mrec');
+}
+
+// ── MENU ──
+function renderMenu(){
+  const wp=recs.filter(r=>r.pr>0&&r.pct!==null);document.getElementById('m-it').textContent=recs.length;
+  if(!wp.length){document.getElementById('m-tbl').innerHTML='<div class="empty"><p>Save recipes with sale prices to analyse.</p></div>';['m-avg','m-st','m-pr'].forEach(id=>document.getElementById(id).textContent='—');return;}
+  const avg=wp.reduce((s,r)=>s+r.pct,0)/wp.length;document.getElementById('m-avg').textContent=avg.toFixed(1)+'%';document.getElementById('m-st').textContent=wp.filter(r=>r.pct<25).length;document.getElementById('m-pr').textContent=wp.filter(r=>r.pct>35).length;
+  const sorted=[...wp].sort((a,b)=>a.pct-b.pct);
+  document.getElementById('m-tbl').innerHTML=`<table><thead><tr><th>Dish</th><th>Cat</th><th>Cost/srv</th><th>Sale Price</th><th>Food Cost%</th><th>Profit/srv</th><th>Rating</th></tr></thead><tbody>${sorted.map(r=>{const pft=r.pr-r.per;const cls=r.pct<25?'bgrn':r.pct<33?'byel':'bred';const st=r.pct<20?'★★★':r.pct<28?'★★':r.pct<35?'★':'—';return`<tr><td><strong>${r.nm}</strong></td><td><span class="badge bg2">${r.cat}</span></td><td>${fmtGBP(r.per)}</td><td>${fmtGBP(r.pr)}</td><td><span class="badge ${cls}">${r.pct.toFixed(1)}%</span></td><td style="color:${pft>0?'var(--olive)':'var(--danger)'};font-weight:600">${fmtGBP(pft)}</td><td style="color:var(--gold)">${st}</td></tr>`;}).join('')}</tbody></table>`;
+  let rx=[];sorted.filter(r=>r.pct>33).forEach(r=>rx.push(`<div style="padding:8px 0;border-bottom:1px solid var(--border-l);font-size:.83rem;"><strong>${r.nm}</strong> — ${r.pct.toFixed(1)}% cost. Raise to <strong>${fmtGBP(r.per/0.29)}</strong> for 29% target.</div>`));sorted.filter(r=>r.pct<20).forEach(r=>rx.push(`<div style="padding:8px 0;border-bottom:1px solid var(--border-l);font-size:.83rem;"><strong>${r.nm}</strong> — <strong style="color:var(--olive)">star dish</strong> at ${r.pct.toFixed(1)}%. Feature prominently.</div>`));
+  document.getElementById('m-rec').innerHTML=rx.length?rx.join(''):'<p style="font-size:.83rem;color:var(--muted)">All dishes are well priced.</p>';
+}
+
+// ── INVENTORY ──
+function addInv(){
+  const nm=document.getElementById('iv-nm').value.trim();const st=parseFloat(document.getElementById('iv-st').value);const un=document.getElementById('iv-un').value;const mn=parseFloat(document.getElementById('iv-mn').value)||0;const co=parseFloat(document.getElementById('iv-co').value)||0;
+  if(!nm||isNaN(st)){alert('Fill name and stock.');return;}
+  inv.push({id:Date.now(),nm,st,un,mn,co,dt:new Date().toLocaleDateString()});save();renderInv();closeM('minv');['iv-nm','iv-st','iv-mn','iv-co'].forEach(id=>document.getElementById(id).value='');toast(`"${nm}" added`);
+}
+function updInv(id,d){const it=inv.find(i=>i.id===id);if(!it)return;it.st=Math.max(0,parseFloat((it.st+d).toFixed(2)));it.dt=new Date().toLocaleDateString();save();renderInv();renderDash();}
+function delInv(id){inv=inv.filter(i=>i.id!==id);save();renderInv();}
+function renderInv(){
+  const low=inv.filter(i=>i.st<=i.mn).length;const val=inv.reduce((s,i)=>s+i.st*i.co,0);
+  document.getElementById('i-tot').textContent=inv.length;document.getElementById('i-low').textContent=low;document.getElementById('i-val').textContent='£'+fmt(val);
+  const w=document.getElementById('inv-wrap');
+  if(!inv.length){w.innerHTML='<div class="empty"><p>No items yet.</p></div>';return;}
+  w.innerHTML=`<table><thead><tr><th>Item</th><th>Stock</th><th>Min</th><th>Status</th><th>Cost/unit</th><th>Value</th><th>Updated</th><th></th></tr></thead>
+  <tbody>${inv.map(i=>{const pct=i.mn>0?Math.min((i.st/i.mn)*100,100):100;const bc=pct<30?'var(--danger)':pct<70?'var(--gold)':'var(--olive)';const st=i.st<=0?'<span class="badge bred">Out of stock</span>':i.st<=i.mn?'<span class="badge byel">Low stock</span>':'<span class="badge bgrn">OK</span>';return`<tr><td><strong>${i.nm}</strong></td>
+    <td><div style="display:flex;align-items:center;gap:5px;"><button class="btn bxs bg" onclick="updInv(${i.id},-1)">−</button><span style="font-weight:600;min-width:46px;text-align:center">${i.st} ${i.un}</span><button class="btn bxs bg" onclick="updInv(${i.id},1)">+</button></div><div class="pbar" style="margin-top:3px;"><div class="pbar-f" style="width:${pct}%;background:${bc}"></div></div></td>
+    <td>${i.mn} ${i.un}</td><td>${st}</td><td>${i.co>0?fmtGBP(i.co):'—'}</td><td>${i.co>0?fmtGBP(i.st*i.co):'—'}</td><td style="color:var(--muted-l);font-size:.72rem">${i.dt}</td><td><button class="del-btn" onclick="delInv(${i.id})">✕</button></td></tr>`;}).join('')}</tbody></table>`;
+}
+
+// ═══════════════════════════════════════
+// ── DAILY CASH ──
+// ═══════════════════════════════════════
+const COINS=[{l:'1p',v:.01},{l:'2p',v:.02},{l:'5p',v:.05},{l:'10p',v:.1},{l:'20p',v:.2},{l:'50p',v:.5},{l:'£1',v:1},{l:'£2',v:2}];
+const NOTES=[{l:'£5',v:5},{l:'£10',v:10},{l:'£20',v:20},{l:'£50',v:50}];
+function buildDenoms(){
+  document.getElementById('coin-rows').innerHTML=COINS.map(d=>drow(d)).join('');
+  document.getElementById('note-rows').innerHTML=NOTES.map(d=>drow(d)).join('');
+}
+function drow(d){const id='d'+d.v.toString().replace('.','_');return`<div class="drow"><div class="dlbl">${d.l}</div><div class="dqty"><button onclick="adj('${id}',-1)">−</button><input type="number" id="${id}" value="0" min="0" step="1" oninput="calcCash()"><button onclick="adj('${id}',1)">+</button></div><div class="dval" id="${id}_v">£0.00</div></div>`;}
+function adj(id,d){const el=document.getElementById(id);if(!el)return;el.value=Math.max(0,(parseInt(el.value)||0)+d);calcCash();}
+
+function calcCash(){
+  let cs=0,ns=0;const det=[];
+  COINS.forEach(d=>{const id='d'+d.v.toString().replace('.','_');const q=parseInt(document.getElementById(id)?.value)||0;const v=q*d.v;cs+=v;const el=document.getElementById(id+'_v');if(el)el.textContent=fmtGBP(v);if(q>0)det.push({l:d.l,q,v});});
+  NOTES.forEach(d=>{const id='d'+d.v.toString().replace('.','_');const q=parseInt(document.getElementById(id)?.value)||0;const v=q*d.v;ns+=v;const el=document.getElementById(id+'_v');if(el)el.textContent=fmtGBP(v);if(q>0)det.push({l:d.l,q,v});});
+  document.getElementById('c-ctot').textContent=fmtGBP(cs);
+  document.getElementById('c-ntot').textContent=fmtGBP(ns);
+
+  const grossTill = cs+ns;
+  const card   = parseFloat(document.getElementById('c-card')?.value)||0;
+  const vouch  = parseFloat(document.getElementById('c-vouch')?.value)||0;
+  const online = parseFloat(document.getElementById('c-online')?.value)||0;
+  const floatIn  = parseFloat(document.getElementById('c-float-in')?.value)||0;
+  const floatOut = parseFloat(document.getElementById('c-float-out')?.value)||0;
+  const posTotal = parseFloat(document.getElementById('c-pos')?.value);
+  const bankExpV = document.getElementById('c-bank-exp')?.value;
+  const bankActV = document.getElementById('c-bank-act')?.value;
+  const bankExp  = bankExpV!==''?parseFloat(bankExpV):NaN;
+  const bankAct  = bankActV!==''?parseFloat(bankActV):NaN;
+
+  // Calculations
+  const netCash   = grossTill - floatIn;           // cash taken during session
+  const toBank    = netCash - floatOut;             // what should be deposited
+  const grossRev  = netCash + card + vouch + online;// total revenue
+  const other     = vouch + online;
+
+  // Revenue panel
+  document.getElementById('c-grand').textContent    = fmtGBP(grossRev);
+  document.getElementById('cs-grosstill').textContent = fmtGBP(grossTill);
+  document.getElementById('cs-card').textContent    = fmtGBP(card);
+  document.getElementById('cs-vouch').textContent   = fmtGBP(vouch);
+  document.getElementById('cs-online').textContent  = fmtGBP(online);
+
+  // Cash recon panel
+  document.getElementById('cs-gross').textContent   = fmtGBP(grossTill);
+  document.getElementById('cs-fin').textContent     = floatIn>0?'−'+fmtGBP(floatIn):'—';
+  document.getElementById('cs-net').textContent     = floatIn>0?fmtGBP(netCash):'—';
+  document.getElementById('cs-fout').textContent    = floatOut>0?'−'+fmtGBP(floatOut):'—';
+  document.getElementById('cs-tobank').textContent  = floatIn>0?fmtGBP(toBank):'—';
+
+  // Cash variance: counted net cash vs expected (toBank)
+  const cashVarEl = document.getElementById('cs-cashvar');
+  const noteEl    = document.getElementById('cs-cashnote');
+  if(floatIn>0){
+    document.getElementById('cs-cashvar').textContent='Cash to bank: '+fmtGBP(toBank);
+    cashVarEl.style.fontSize='1.3rem';
+    noteEl.textContent='Gross till − opening float − closing float = cash to deposit.';
+  } else {
+    cashVarEl.textContent='—';
+    noteEl.textContent='Enter opening float to calculate cash to bank.';
+  }
+
+  // Bank cross-check
+  const bankVarEl   = document.getElementById('cs-bankvar');
+  const bankNoteEl  = document.getElementById('cs-banknote');
+  document.getElementById('cs-bankexp2').textContent = floatIn>0?fmtGBP(toBank):'—';
+  document.getElementById('cs-bankexp').textContent  = !isNaN(bankExp)?fmtGBP(bankExp):'—';
+  document.getElementById('cs-bankact').textContent  = !isNaN(bankAct)?fmtGBP(bankAct):'—';
+
+  if(!isNaN(bankAct)&&floatIn>0){
+    const bv=bankAct-toBank;
+    bankVarEl.textContent=(bv>=0?'+':'')+fmtGBP(bv);
+    bankVarEl.style.color=Math.abs(bv)<.01?'#F5E8C8':bv>0?'#A8D878':'#F09090';
+    bankNoteEl.textContent=Math.abs(bv)<.01?'Actual deposit matches expected — reconciled.'
+      :bv>0?`£${Math.abs(bv).toFixed(2)} more deposited than expected. Check for extra cash.`
+      :`£${Math.abs(bv).toFixed(2)} less deposited than expected. Investigate discrepancy.`;
+  } else if(!isNaN(bankExp)&&floatIn>0){
+    const bv=bankExp-toBank;
+    bankVarEl.textContent=(bv>=0?'+':'')+fmtGBP(bv);
+    bankVarEl.style.color=Math.abs(bv)<.01?'#F5E8C8':bv>0?'#A8D878':'#F09090';
+    bankNoteEl.textContent='Comparing expected deposit to calculated cash to bank.';
+  } else {
+    bankVarEl.textContent='—';
+    bankNoteEl.textContent='Enter bank deposit figures to cross-check.';
+  }
+
+  // POS cross-check
+  const posVarEl   = document.getElementById('cs-posvar');
+  const posNoteEl  = document.getElementById('cs-posnote');
+  if(!isNaN(posTotal)&&posTotal>0){
+    const pv=grossRev-posTotal;
+    posVarEl.textContent=(pv>=0?'+':'')+fmtGBP(pv);
+    posVarEl.style.color=Math.abs(pv)<.01?'#F5E8C8':Math.abs(pv)<2?'#A8D878':'#F09090';
+    posNoteEl.textContent=Math.abs(pv)<.01?'Counted revenue matches POS exactly.'
+      :`£${Math.abs(pv).toFixed(2)} ${pv>0?'over':'under'} POS total.`;
+  } else {
+    posVarEl.textContent='—';posNoteEl.textContent='Enter POS total to compare.';
+  }
+
+  // Payment mix bars
+  if(grossRev>0){
+    const cp=netCash/grossRev*100,kp=card/grossRev*100,op=other/grossRev*100;
+    document.getElementById('pc-cash').textContent=cp.toFixed(0)+'%';document.getElementById('pc-card').textContent=kp.toFixed(0)+'%';document.getElementById('pc-other').textContent=op.toFixed(0)+'%';
+    document.getElementById('pb-cash').style.width=cp+'%';document.getElementById('pb-card').style.width=kp+'%';document.getElementById('pb-other').style.width=op+'%';
+  }
+
+  // Denomination table
+  const tb=document.getElementById('denom-body');
+  tb.innerHTML=det.length?det.map(r=>`<tr><td>${r.l}</td><td>× ${r.q}</td><td>${fmtGBP(r.v)}</td></tr>`).join(''):'<tr><td colspan="3" style="color:var(--muted-l);text-align:center;font-size:.82rem;">No denominations counted yet.</td></tr>';
+  document.getElementById('denom-tot').textContent=fmtGBP(grossTill);
+}
+
+function clearCash(){
+  [...COINS,...NOTES].forEach(d=>{const id='d'+d.v.toString().replace('.','_');const el=document.getElementById(id);if(el)el.value=0;const vel=document.getElementById(id+'_v');if(vel)vel.textContent='£0.00';});
+  ['c-card','c-vouch','c-online','c-float-in','c-float-out','c-pos','c-bank-exp','c-bank-act'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  calcCash();
+}
+
+function saveSess(){
+  let grossTill=0;[...COINS,...NOTES].forEach(d=>{grossTill+=(parseInt(document.getElementById('d'+d.v.toString().replace('.','_'))?.value)||0)*d.v;});
+  const card   = parseFloat(document.getElementById('c-card')?.value)||0;
+  const vouch  = parseFloat(document.getElementById('c-vouch')?.value)||0;
+  const online = parseFloat(document.getElementById('c-online')?.value)||0;
+  const floatIn  = parseFloat(document.getElementById('c-float-in')?.value)||0;
+  const floatOut = parseFloat(document.getElementById('c-float-out')?.value)||0;
+  const posTotal = document.getElementById('c-pos')?.value;
+  const bankExp  = document.getElementById('c-bank-exp')?.value;
+  const bankAct  = document.getElementById('c-bank-act')?.value;
+  const date = document.getElementById('c-date')?.value||new Date().toISOString().slice(0,10);
+  const sess = document.getElementById('c-sess')?.value||'Full Day';
+  const netCash = grossTill - floatIn;
+  const toBank  = netCash - floatOut;
+  const grand   = netCash + card + vouch + online;
+  if(grossTill===0&&card===0){alert('Nothing counted yet.');return;}
+
+  // Determine reconciliation status
+  const bAct=bankAct!==''?parseFloat(bankAct):null;
+  const bExp=bankExp!==''?parseFloat(bankExp):null;
+  let status='pending';
+  if(bAct!==null&&floatIn>0){const bv=bAct-toBank;status=Math.abs(bv)<.01?'ok':bv>0?'over':'short';}
+  else if(bExp!==null&&floatIn>0){const bv=bExp-toBank;status=Math.abs(bv)<.01?'ok':bv>0?'over':'short';}
+
+  clog.unshift({id:Date.now(),date,sess,grossTill,floatIn,floatOut,netCash,toBank,card,vouch,online,grand,pos:posTotal!==''?parseFloat(posTotal):null,bankExp:bExp,bankAct:bAct,status,dt:new Date().toLocaleString()});
+  save();renderClog();toast('Session saved');
+}
+
+function delSess(id){clog=clog.filter(s=>s.id!==id);save();renderClog();}
+
+function renderClog(){
+  const el=document.getElementById('c-log');
+  const filter=document.getElementById('c-log-filter')?.value||'';
+  const list=filter?clog.filter(s=>s.status===filter):clog;
+  if(!list.length){el.innerHTML='<div class="empty"><p>No sessions'+(filter?' matching filter':'')+' yet.</p></div>';return;}
+  el.innerHTML=`<div class="tw"><table><thead><tr><th>Date</th><th>Session</th><th>Gross Till</th><th>To Bank</th><th>Card</th><th>Revenue</th><th>POS Var</th><th>Bank Status</th><th></th></tr></thead>
+  <tbody>${list.map(s=>{
+    const posv=s.pos!==null?s.grand-s.pos:null;
+    const bankv=s.bankAct!==null&&s.floatIn>0?s.bankAct-s.toBank:s.bankExp!==null&&s.floatIn>0?s.bankExp-s.toBank:null;
+    const sc=s.status==='ok'?'bgrn':s.status==='over'?'byel':s.status==='short'?'bred':'bg2';
+    const sl=s.status==='ok'?'Balanced':s.status==='over'?'Over':s.status==='short'?'Short':'Pending';
+    return`<tr>
+      <td>${s.date}</td><td><span class="badge bg2">${s.sess}</span></td>
+      <td>${fmtGBP(s.grossTill)}</td>
+      <td style="font-weight:600">${s.floatIn>0?fmtGBP(s.toBank):'—'}</td>
+      <td>${fmtGBP(s.card)}</td>
+      <td style="font-weight:700">${fmtGBP(s.grand)}</td>
+      <td style="color:${posv!==null?(Math.abs(posv)<.01?'var(--olive)':Math.abs(posv)<2?'var(--gold)':'var(--danger)'):'var(--muted-l)'}">${posv!==null?(posv>=0?'+':'')+fmtGBP(posv):'—'}</td>
+      <td><span class="badge ${sc}">${sl}</span></td>
+      <td><button class="del-btn" onclick="delSess(${s.id})">✕</button></td>
+    </tr>`;
+  }).join('')}</tbody></table></div>`;
+}
+
+function exportCSV(){
+  if(!clog.length){alert('No sessions to export.');return;}
+  let c='Date,Session,Gross Till (£),Opening Float (£),Closing Float (£),Net Cash (£),Cash to Bank (£),Card (£),Vouchers (£),Online (£),Total Revenue (£),POS Total (£),Expected Deposit (£),Actual Deposit (£),Bank Status\n';
+  clog.forEach(s=>{c+=`${s.date},${s.sess},${s.grossTill.toFixed(2)},${s.floatIn||0},${s.floatOut||0},${(s.netCash||0).toFixed(2)},${(s.toBank||0).toFixed(2)},${s.card.toFixed(2)},${(s.vouch||0).toFixed(2)},${(s.online||0).toFixed(2)},${s.grand.toFixed(2)},${s.pos!==null?s.pos.toFixed(2):''},${s.bankExp!==null?s.bankExp.toFixed(2):''},${s.bankAct!==null?s.bankAct.toFixed(2):''},${s.status}\n`;});
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(c);a.download='cash-'+new Date().toISOString().slice(0,10)+'.csv';a.click();toast('CSV exported');
+}
+
+// ═══════════════════════════════════════
+// ── FINANCES ──
+// ═══════════════════════════════════════
+function showFtab(id,btn){
+  document.querySelectorAll(".ftab-c").forEach(el=>{el.style.display="none";});
+  document.querySelectorAll(".ftab").forEach(b=>b.classList.remove("active"));
+  const el=document.getElementById("ftab-"+id);
+  if(el){el.style.display="block";}
+  if(btn)btn.classList.add("active");
+  if(id==="breakeven")calcBreakeven();
+  if(id==="expenses"){renderExp();populateMonthFilter();}
+  if(id==="payroll")renderPayroll();
+  if(id==="pnl")calcFin();
+}
+
+// P&L
+function calcFin(){
+  const cv=parseFloat(document.getElementById('f-cv')?.value)||0;
+  const sp=parseFloat(document.getElementById('f-sp')?.value)||0;
+  const dy=parseFloat(document.getElementById('f-dy')?.value)||0;
+  const del=parseFloat(document.getElementById('f-del')?.value)||0;
+  const ex=parseFloat(document.getElementById('f-ex')?.value)||0;
+  const fp=parseFloat(document.getElementById('f-fp')?.value)||30;
+  const rn=parseFloat(document.getElementById('f-rn')?.value)||0;
+  const ut=parseFloat(document.getElementById('f-ut')?.value)||0;
+  const ins=parseFloat(document.getElementById('f-ins')?.value)||0;
+  const sft=parseFloat(document.getElementById('f-sft')?.value)||0;
+  const mk=parseFloat(document.getElementById('f-mk')?.value)||0;
+  const ot=parseFloat(document.getElementById('f-ot')?.value)||0;
+  const wg=parseFloat(document.getElementById('f-wg')?.value)||0;
+
+  const dineRev=cv*sp*dy; const rev=dineRev+del+ex;
+  const fc=rev*(fp/100); const fixed=rn+ut+ins+sft+mk+ot; const labour=wg;
+  const totalCost=fc+fixed+labour; const profit=rev-totalCost;
+  const margin=rev>0?(profit/rev)*100:0;
+
+  document.getElementById('f-fc-calc').textContent=rev>0?fmtGBP(fc):'—';
+  document.getElementById('pnl-rev').textContent=rev>0?'£'+fmt(rev):'—';
+  document.getElementById('pnl-costs').textContent=totalCost>0?'£'+fmt(totalCost):'—';
+  document.getElementById('pnl-profit').textContent=profit!==0?'£'+fmt(profit):'—';
+  document.getElementById('pnl-profit').style.color=profit>=0?'var(--olive)':'var(--danger)';
+  document.getElementById('pnl-margin').textContent=rev>0?margin.toFixed(1)+'%':'—';
+
+  if(!rev&&!wg){document.getElementById('f-res').style.display='none';return;}
+  document.getElementById('f-res').style.display='block';
+
+  const fw=rev>0?(fc/rev*100).toFixed(1):0;const lw=rev>0?(labour/rev*100).toFixed(1):0;const xw=rev>0?(fixed/rev*100).toFixed(1):0;const pw=Math.max(0,margin).toFixed(1);
+  document.getElementById('f-out').innerHTML=`
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;">
+    <div>
+      <div style="background:var(--warm);border-radius:10px;padding:14px 16px;margin-bottom:10px;">
+        <div class="crow" style="border:none;padding:5px 0;"><span style="color:var(--muted)">Dine-in revenue</span><span>£${fmt(dineRev)}</span></div>
+        ${del>0?`<div class="crow" style="border:none;padding:5px 0;"><span style="color:var(--muted)">Delivery revenue</span><span>£${fmt(del)}</span></div>`:''}
+        ${ex>0?`<div class="crow" style="border:none;padding:5px 0;"><span style="color:var(--muted)">Other revenue</span><span>£${fmt(ex)}</span></div>`:''}
+        <div class="crow" style="padding:7px 0;font-weight:600;"><span>Total Revenue</span><span>£${fmt(rev)}</span></div>
+        <hr class="divl">
+        <div class="crow" style="border:none;padding:5px 0;"><span style="color:var(--muted)">Food &amp; bev cost (${fp}%)</span><span style="color:var(--danger)">−£${fmt(fc)}</span></div>
+        <div class="crow" style="border:none;padding:5px 0;"><span style="color:var(--muted)">Labour</span><span style="color:var(--danger)">−£${fmt(labour)}</span></div>
+        <div class="crow" style="border:none;padding:5px 0;"><span style="color:var(--muted)">Fixed overheads</span><span style="color:var(--danger)">−£${fmt(fixed)}</span></div>
+        <hr class="divl">
+        <div class="crow" style="padding:5px 0;"><span style="font-weight:700">Net Profit</span><span style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700;color:${profit>=0?'var(--olive)':'var(--danger)'};">${profit>=0?'':'−'}£${fmt(Math.abs(profit))}</span></div>
+      </div>
+      <div style="padding:10px 12px;background:var(--warm);border-radius:7px;font-size:.79rem;color:var(--muted);">${profit<0?'Running at a loss. Increase revenue or cut costs.':margin<5?'Very thin margins. Target 10–15% net.':margin<10?'Margins could improve. Aim for 10–15%.':'Healthy margins. Keep monitoring costs.'}</div>
+      <div style="margin-top:9px;padding:11px 14px;background:var(--warm);border-radius:8px;"><div style="font-size:.67rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">Annual Projection</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.7rem;color:${profit>=0?'var(--olive)':'var(--danger)'};">${profit>=0?'':'−'}£${fmt(Math.abs(profit*12))}</div></div>
+    </div>
+    <div>
+      ${fbar('Food &amp; bev cost',fw+'%',fw,'var(--rust)')}
+      ${fbar('Labour',lw+'%',lw,'var(--gold)')}
+      ${fbar('Fixed costs',xw+'%',xw,'var(--brown)')}
+      ${fbar('Net profit',pw+'%',pw,'var(--olive)')}
+    </div>
+  </div>`;
+}
+function fbar(lbl,val,pct,col){return`<div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:.77rem;color:var(--muted);margin-bottom:3px;"><span>${lbl}</span><span>${val}</span></div><div class="pbar"><div class="pbar-f" style="width:${Math.min(pct,100)}%;background:${col}"></div></div></div>`;}
+
+// EXPENSES
+function addExp(){
+  const desc=document.getElementById('ex-desc').value.trim();const amt=parseFloat(document.getElementById('ex-amt').value);const date=document.getElementById('ex-date').value;const cat=document.getElementById('ex-cat').value;const pay=document.getElementById('ex-pay').value;const note=document.getElementById('ex-note').value.trim();
+  if(!desc||isNaN(amt)||!date){alert('Please fill description, amount and date.');return;}
+  exps.push({id:Date.now(),desc,amt,date,cat,pay,note});save();renderExp();closeM('mexp');
+  ['ex-desc','ex-amt','ex-note'].forEach(id=>document.getElementById(id).value='');document.getElementById('ex-date').valueAsDate=new Date();
+  toast(`Expense added: £${amt.toFixed(2)}`);populateMonthFilter();
+}
+function delExp(id){exps=exps.filter(e=>e.id!==id);save();renderExp();}
+function populateMonthFilter(){
+  const months=[...new Set(exps.map(e=>e.date.slice(0,7)))].sort().reverse();
+  const sel=document.getElementById('exp-fmon');if(!sel)return;
+  const cur=sel.value;sel.innerHTML='<option value="">All time</option>'+months.map(m=>`<option value="${m}">${m}</option>`).join('');
+  sel.value=cur;
+}
+function renderExp(){
+  const fcat=document.getElementById('exp-fcat')?.value||'';
+  const fmon=document.getElementById('exp-fmon')?.value||'';
+  let list=exps.filter(e=>(!fcat||e.cat===fcat)&&(!fmon||e.date.startsWith(fmon)));
+  list=[...list].sort((a,b)=>b.date.localeCompare(a.date));
+
+  const now=new Date();const thisMonth=now.toISOString().slice(0,7);
+  const monStart=new Date(now.getFullYear(),now.getMonth(),1);
+  const wkStart=new Date(now);wkStart.setDate(now.getDate()-now.getDay());
+
+  const totMonth=exps.filter(e=>e.date.startsWith(thisMonth)).reduce((s,e)=>s+e.amt,0);
+  const totWeek=exps.filter(e=>new Date(e.date)>=wkStart).reduce((s,e)=>s+e.amt,0);
+  const totAll=exps.reduce((s,e)=>s+e.amt,0);
+  document.getElementById('exp-month').textContent='£'+fmt(totMonth);
+  document.getElementById('exp-week').textContent='£'+fmt(totWeek);
+  document.getElementById('exp-total').textContent='£'+fmt(totAll);
+
+  // Top category
+  const catTotals={};exps.forEach(e=>{catTotals[e.cat]=(catTotals[e.cat]||0)+e.amt;});
+  const topCat=Object.entries(catTotals).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById('exp-topcat').textContent=topCat?topCat[0]:'—';
+
+  const w=document.getElementById('exp-wrap');
+  if(!list.length){w.innerHTML='<div class="empty"><p>No expenses'+(fcat||fmon?' matching filter':'')+' yet.</p></div>';}
+  else{w.innerHTML=`<table><thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Payment</th><th>Amount</th><th></th></tr></thead><tbody>${list.map(e=>`<tr><td style="color:var(--muted-l);font-size:.78rem">${e.date}</td><td><strong>${e.desc}</strong>${e.note?`<br><span style="font-size:.72rem;color:var(--muted-l)">${e.note}</span>`:''}</td><td><span class="badge bg2">${e.cat}</span></td><td><span class="badge bg2">${e.pay}</span></td><td style="font-weight:600">${fmtGBP(e.amt)}</td><td><button class="del-btn" onclick="delExp(${e.id})">✕</button></td></tr>`).join('')}</tbody></table>`;}
+
+  // Category chart
+  const chart=document.getElementById('exp-chart');if(!chart)return;
+  const sorted=Object.entries(catTotals).sort((a,b)=>b[1]-a[1]);
+  const max=sorted[0]?.[1]||1;
+  chart.innerHTML=sorted.map(([cat,amt])=>`<div class="barchart-row"><span style="color:var(--muted);font-size:.77rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${cat}</span><div class="barchart-bar"><div class="barchart-fill" style="width:${(amt/max*100).toFixed(0)}%"></div></div><span style="font-size:.77rem;font-weight:600;text-align:right;">${fmtGBP(amt)}</span></div>`).join('');
+}
+
+// PAYROLL
+function addStaff(){
+  const nm=document.getElementById('st-nm').value.trim();const role=document.getElementById('st-role').value;const type=document.getElementById('st-type').value;const rate=parseFloat(document.getElementById('st-rate').value);const hrs=parseFloat(document.getElementById('st-hrs').value)||0;
+  if(!nm||isNaN(rate)){alert('Enter name and rate.');return;}
+  const weeklyWage=type==='hourly'?rate*hrs:rate/4.33;const monthlyWage=type==='salary'?rate:rate*hrs*4.33;
+  staff.push({id:Date.now(),nm,role,type,rate,hrs,weeklyWage,monthlyWage});save();renderPayroll();closeM('mstaff');['st-nm','st-rate','st-hrs'].forEach(id=>document.getElementById(id).value='');toast(`${nm} added`);
+}
+function delStaff(id){staff=staff.filter(s=>s.id!==id);save();renderPayroll();}
+function renderPayroll(){
+  const totalWeekly=staff.reduce((s,m)=>s+m.weeklyWage,0);const totalMonthly=staff.reduce((s,m)=>s+m.monthlyWage,0);const totalHrs=staff.filter(m=>m.type==='hourly').reduce((s,m)=>s+m.hrs,0);
+  document.getElementById('pay-cnt').textContent=staff.length;document.getElementById('pay-hrs').textContent=totalHrs.toFixed(0);document.getElementById('pay-wk').textContent=fmtGBP(totalWeekly);document.getElementById('pay-mo').textContent=fmtGBP(totalMonthly);
+  const w=document.getElementById('staff-wrap');
+  if(!staff.length){w.innerHTML='<div class="empty"><p>No staff added yet.</p></div>';return;}
+  w.innerHTML=`<table><thead><tr><th>Name</th><th>Role</th><th>Contract</th><th>Rate</th><th>Hrs/wk</th><th>Weekly</th><th>Monthly</th><th></th></tr></thead><tbody>${staff.map(m=>`<tr><td><strong>${m.nm}</strong></td><td><span class="badge bg2">${m.role}</span></td><td>${m.type==='hourly'?'Hourly':'Salary'}</td><td>${fmtGBP(m.rate)}</td><td>${m.type==='hourly'?m.hrs:'-'}</td><td>${fmtGBP(m.weeklyWage)}</td><td>${fmtGBP(m.monthlyWage)}</td><td><button class="del-btn" onclick="delStaff(${m.id})">✕</button></td></tr>`).join('')}</tbody></table>`;
+}
+function applyPayroll(){
+  const total=staff.reduce((s,m)=>s+m.monthlyWage,0);
+  document.getElementById('f-wg').value=total.toFixed(2);
+  calcFin();showFtab('pnl',document.querySelector('.ftab'));
+  toast('Payroll applied to P&L');
+}
+
+// VAT
+function calcVAT(){
+  const rate=parseFloat(document.getElementById('vat-rate')?.value)||20;const amt=parseFloat(document.getElementById('vat-amt')?.value)||0;const dir=document.getElementById('vat-dir')?.value;const el=document.getElementById('vat-result');
+  if(!amt){el.innerHTML='Enter an amount above.';return;}
+  if(dir==='ex'){const vatAmt=amt*(rate/100);const total=amt+vatAmt;el.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;"><div><div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;margin-bottom:3px;">Net (ex-VAT)</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;color:var(--brown);">${fmtGBP(amt)}</div></div><div><div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;margin-bottom:3px;">VAT (${rate}%)</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;color:var(--rust);">${fmtGBP(vatAmt)}</div></div><div><div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;margin-bottom:3px;">Gross (inc-VAT)</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;color:var(--olive);">${fmtGBP(total)}</div></div></div>`;}
+  else{const net=amt/(1+rate/100);const vatAmt=amt-net;el.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;"><div><div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;margin-bottom:3px;">Gross (inc-VAT)</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;color:var(--brown);">${fmtGBP(amt)}</div></div><div><div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;margin-bottom:3px;">VAT (${rate}%)</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;color:var(--rust);">${fmtGBP(vatAmt)}</div></div><div><div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;margin-bottom:3px;">Net (ex-VAT)</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;color:var(--olive);">${fmtGBP(net)}</div></div></div>`;}
+}
+function calcVATQ(){
+  const rev=parseFloat(document.getElementById('vat-rev')?.value)||0;const pur=parseFloat(document.getElementById('vat-pur')?.value)||0;const rate=parseFloat(document.getElementById('vat-qrate')?.value)||20;const el=document.getElementById('vat-q-result');
+  const r=rate/100;const vatOnSales=rev*3*r;const vatOnPurch=pur*3*r;const net=vatOnSales-vatOnPurch;
+  el.innerHTML=`<div style="font-size:.73rem;color:var(--muted);margin-bottom:8px;">Over 3 months:</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;"><div><div style="font-size:.63rem;color:var(--muted);text-transform:uppercase;margin-bottom:2px;">VAT on sales</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;color:var(--rust);">${fmtGBP(vatOnSales)}</div></div><div><div style="font-size:.63rem;color:var(--muted);text-transform:uppercase;margin-bottom:2px;">Input VAT</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;color:var(--olive);">−${fmtGBP(vatOnPurch)}</div></div><div><div style="font-size:.63rem;color:var(--muted);text-transform:uppercase;margin-bottom:2px;">Payable</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;color:${net>0?'var(--danger)':'var(--olive)'};">${fmtGBP(Math.abs(net))}${net<0?' refund':''}</div></div></div><p style="font-size:.72rem;color:var(--muted-l);margin-top:8px;">This is an estimate only. Consult your accountant for accuracy.</p>`;
+}
+
+// BREAKEVEN
+function calcBreakeven(){
+  const cv=parseFloat(document.getElementById('f-cv')?.value)||0;const sp=parseFloat(document.getElementById('f-sp')?.value)||0;const dy=parseFloat(document.getElementById('f-dy')?.value)||0;
+  const fp=parseFloat(document.getElementById('f-fp')?.value)||30;const rn=parseFloat(document.getElementById('f-rn')?.value)||0;const ut=parseFloat(document.getElementById('f-ut')?.value)||0;const ins=parseFloat(document.getElementById('f-ins')?.value)||0;const sft=parseFloat(document.getElementById('f-sft')?.value)||0;const mk=parseFloat(document.getElementById('f-mk')?.value)||0;const ot=parseFloat(document.getElementById('f-ot')?.value)||0;const wg=parseFloat(document.getElementById('f-wg')?.value)||0;
+  const fixed=rn+ut+ins+sft+mk+ot+wg;const cm=sp*(1-fp/100);
+  if(!sp||!fixed||!dy){document.getElementById('be-detail').textContent='Fill in the P&L Planner fields to calculate breakeven.';return;}
+  const beCov=fixed/(cm*dy);const beRev=beCov*sp;const beDay=fixed/(cv*cm);
+  document.getElementById('be-cov').textContent=isFinite(beCov)?Math.ceil(beCov)+'/day':'—';
+  document.getElementById('be-rev').textContent=isFinite(beRev)?'£'+fmt(beRev/dy)+'/day':'—';
+  document.getElementById('be-day').textContent=isFinite(beDay)?'Day '+Math.ceil(beDay):'—';
+  document.getElementById('be-cm').textContent=fmtGBP(cm);
+  document.getElementById('be-detail').innerHTML=isFinite(beCov)?`You need <strong>${Math.ceil(beCov)} covers/day</strong> to break even. You currently target <strong>${cv}/day</strong> — <span style="color:${cv>=Math.ceil(beCov)?'var(--olive)':'var(--danger)'}">${cv>=Math.ceil(beCov)?'above breakeven by '+(cv-Math.ceil(beCov))+' covers.':'you need '+(Math.ceil(beCov)-cv)+' more covers/day to break even.'}</span><br>Contribution margin per cover: <strong>${fmtGBP(cm)}</strong> — every cover above breakeven adds ${fmtGBP(cm)} to profit.`:'Fill in all P&L fields to calculate.';
+  calcWhatIf();
+}
+function calcWhatIf(){
+  const sp=parseFloat(document.getElementById('f-sp')?.value)||0;const fp=parseFloat(document.getElementById('f-fp')?.value)||30;const dy=parseFloat(document.getElementById('f-dy')?.value)||0;
+  const rn=parseFloat(document.getElementById('f-rn')?.value)||0;const ut=parseFloat(document.getElementById('f-ut')?.value)||0;const ins=parseFloat(document.getElementById('f-ins')?.value)||0;const sft=parseFloat(document.getElementById('f-sft')?.value)||0;const mk=parseFloat(document.getElementById('f-mk')?.value)||0;const ot=parseFloat(document.getElementById('f-ot')?.value)||0;const wg=parseFloat(document.getElementById('f-wg')?.value)||0;
+  const fixed=rn+ut+ins+sft+mk+ot+wg;
+  const wiSpend=parseFloat(document.getElementById('wi-spend')?.value)||sp;const wiSave=parseFloat(document.getElementById('wi-save')?.value)||0;const wiFc=parseFloat(document.getElementById('wi-fc')?.value)||fp;
+  const newFixed=fixed-wiSave;const newCm=wiSpend*(1-wiFc/100);const newBe=dy>0?newFixed/(newCm*dy):0;
+  const el=document.getElementById('wi-result');
+  if(!sp||!fixed){el.textContent='Fill in P&L Planner first.';return;}
+  el.innerHTML=`With avg spend <strong>${fmtGBP(wiSpend)}</strong>, food cost <strong>${wiFc}%</strong>, and fixed costs cut by <strong>${fmtGBP(wiSave)}/month</strong>:<br>New breakeven = <strong style="color:var(--rust)">${isFinite(newBe)?Math.ceil(newBe)+' covers/day':'N/A'}</strong> (contribution margin: ${fmtGBP(newCm)}/cover).`;
+}
+
+function exportFinCSV(){
+  let c='La Cocina Pro — Finance Report\n\nP&L PLANNER\n';
+  const fields=[['f-cv','Avg covers/day'],['f-sp','Avg spend (£)'],['f-dy','Days open/month'],['f-fp','Food cost %'],['f-rn','Rent'],['f-ut','Utilities'],['f-ins','Insurance'],['f-sft','Software'],['f-mk','Marketing'],['f-ot','Other fixed'],['f-wg','Labour']];
+  fields.forEach(([id,lbl])=>{const v=document.getElementById(id)?.value;if(v)c+=`${lbl},${v}\n`;});
+  c+='\nEXPENSES\nDate,Description,Category,Payment,Amount (£)\n';
+  exps.forEach(e=>{c+=`${e.date},"${e.desc}",${e.cat},${e.pay},${e.amt.toFixed(2)}\n`;});
+  c+='\nPAYROLL\nName,Role,Type,Rate (£),Hours/wk,Monthly Wage (£)\n';
+  staff.forEach(s=>{c+=`${s.nm},${s.role},${s.type},${s.rate.toFixed(2)},${s.type==='hourly'?s.hrs:'-'},${s.monthlyWage.toFixed(2)}\n`;});
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(c);a.download='finance-report-'+new Date().toISOString().slice(0,10)+'.csv';a.click();toast('Report exported');
+}
+
+// ── CONVERTER ──
+const toB={kg:1000,g:1,lb:453.592,oz:28.3495,liter:1000,ml:1,gallon:3785.41,quart:946.353,pint:473.176,cup:240,floz:29.5735,tbsp:14.7868,tsp:4.92892};
+const wU=['kg','g','lb','oz'];
+function doConv(){const a=parseFloat(document.getElementById('cv-a').value);const f=document.getElementById('cv-f').value;const t=document.getElementById('cv-t').value;const el=document.getElementById('cv-r');if(isNaN(a)){el.textContent='';return;}if((wU.includes(f)?'w':'v')!==(wU.includes(t)?'w':'v')){el.innerHTML='<span style="font-size:.82rem;color:var(--muted)">Cannot mix weight and volume.</span>';return;}const r=(a*toB[f])/toB[t];el.textContent='= '+(Number.isInteger(r)?r:r.toFixed(4))+' '+t;}
+function doScale(){const o=parseFloat(document.getElementById('sc-o').value);const t=parseFloat(document.getElementById('sc-t').value);const q=document.getElementById('sc-q').value.trim();const el=document.getElementById('sc-r');if(!o||!t||!q){el.textContent='';return;}const m=q.match(/([\d.]+)\s*(.*)/);if(!m)return;el.textContent='= '+(parseFloat(m[1])*t/o).toFixed(2)+' '+m[2].trim();}
+function convT(d){if(d==='c'){const c=parseFloat(document.getElementById('tc').value);if(!isNaN(c)){document.getElementById('tf').value=((c*9/5)+32).toFixed(0);document.getElementById('t-desc').textContent=c<120?'Low heat':c<160?'Moderate heat':c<200?'Medium-high heat':c<230?'High heat':'Very high heat';}}else{const f=parseFloat(document.getElementById('tf').value);if(!isNaN(f))document.getElementById('tc').value=((f-32)*5/9).toFixed(0);}}
+
+// ── AI CHAT ──
+async function sendChat(){
+  const inp=document.getElementById('chat-in');const msg=inp.value.trim();if(!msg)return;inp.value='';
+  addBubble('user',msg);chatH.push({role:'user',content:msg});
+  const th=addBubble('ai','…');
+  try{const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:`You are a practical culinary business advisor for a small restaurant. Help with food costs, menu pricing, recipes, kitchen efficiency, and finances. Be concise and actionable. ${recs.length} recipes and ${ings.length} ingredients in database.`,messages:chatH})});const data=await res.json();const reply=data.content?.[0]?.text||'No response.';th.textContent=reply;chatH.push({role:'assistant',content:reply});}
+  catch(e){th.textContent='Connection error. Please try again.';}
+}
+function addBubble(r,t){const c=document.getElementById('chat-msgs');const d=document.createElement('div');d.style.cssText='margin-bottom:8px;display:flex;justify-content:'+(r==='user'?'flex-end':'flex-start');const b=document.createElement('div');b.textContent=t;b.style.cssText='display:inline-block;padding:8px 12px;font-size:.83rem;max-width:85%;white-space:pre-wrap;line-height:1.5;border-radius:'+(r==='user'?'12px 12px 2px 12px':'12px 12px 12px 2px')+';background:'+(r==='user'?'var(--rust);color:#fff':'var(--card);border:1px solid var(--border)');d.appendChild(b);c.appendChild(d);c.scrollTop=c.scrollHeight;return b;}
+function qchat(m){document.getElementById('chat-in').value=m;sendChat();}
+
+// ── DASHBOARD ──
+function renderDash(){
+  document.getElementById('d-ing').textContent=ings.length;document.getElementById('d-rec').textContent=recs.length;
+  const wp=recs.filter(r=>r.pr>0&&r.pct);
+  if(wp.length){const avg=wp.reduce((s,r)=>s+r.pct,0)/wp.length;document.getElementById('d-fc').textContent=avg.toFixed(1)+'%';const best=wp.reduce((a,b)=>(b.pr-b.per)>(a.pr-a.per)?b:a);document.getElementById('d-bm').textContent=fmtGBP(best.pr-best.per);document.getElementById('d-bd').textContent=best.nm;}
+  document.getElementById('d-ls').textContent=inv.filter(i=>i.st<=i.mn).length;
+  const top=[...wp].sort((a,b)=>(b.pr-b.per)-(a.pr-a.per)).slice(0,5);
+  document.getElementById('d-top').innerHTML=top.length?top.map((r,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border-l);font-size:.82rem;"><span>${['1st','2nd','3rd','4th','5th'][i]}  ${r.nm}</span><span style="font-weight:600;color:var(--olive)">+${fmtGBP(r.pr-r.per)}/srv</span></div>`).join(''):'<div class="empty" style="padding:16px"><p>Add recipes with prices.</p></div>';
+  const al=[];wp.filter(r=>r.pct>35).forEach(r=>al.push(`<div style="padding:5px 0;border-bottom:1px solid var(--border-l);font-size:.81rem;"><strong>${r.nm}</strong> — food cost ${r.pct.toFixed(0)}%</div>`));inv.filter(i=>i.st<=i.mn).forEach(i=>al.push(`<div style="padding:5px 0;border-bottom:1px solid var(--border-l);font-size:.81rem;"><strong>${i.nm}</strong> low: ${i.st} ${i.un}</div>`));
+  document.getElementById('d-alerts').innerHTML=al.length?al.join(''):'<div class="empty" style="padding:16px"><p>No alerts. All good.</p></div>';
+}
+
+// ── INIT ──
+document.getElementById('c-date').valueAsDate=new Date();
+document.getElementById('ex-date').valueAsDate=new Date();
+buildDenoms();calcCash();renderIng();renderDash();renderLib();renderAlg();renderClog();populateMonthFilter();
+</script>
+</body>
+</html>
