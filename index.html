@@ -195,10 +195,54 @@ tbody tr:hover td{background:var(--warm)}
 @media(max-width:420px){.main{padding:66px 11px 82px}.srow{gap:8px}.card{padding:14px 14px}}
 @media(max-width:768px){.bnav{display:block}}
 @media print{.sidebar,.topbar,.bnav,.btn,.del-btn,.mwrap,.toast{display:none!important}.main{margin-left:0!important;padding:16px!important}.card{box-shadow:none!important}}
+/* AUTH SCREEN */
+.auth-wrap{position:fixed;inset:0;background:var(--brown);display:flex;align-items:center;justify-content:center;z-index:999;padding:20px}
+.auth-box{background:var(--card);border-radius:16px;padding:36px 32px;width:100%;max-width:380px;box-shadow:var(--shadow-md)}
+.auth-logo{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--brown);margin-bottom:4px}
+.auth-sub{font-size:.75rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:28px}
+.auth-title{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:600;color:var(--brown);margin-bottom:18px}
+.auth-err{background:#FDECEA;color:var(--danger);border-radius:7px;padding:9px 12px;font-size:.8rem;margin-bottom:14px;display:none}
+.auth-link{font-size:.8rem;color:var(--muted);margin-top:14px;text-align:center}
+.auth-link span{color:var(--rust);cursor:pointer;font-weight:500}
+.auth-loading{display:none;text-align:center;font-size:.85rem;color:var(--muted);padding:8px}
+/* USER BADGE */
+.user-badge{font-size:.65rem;color:rgba(245,232,200,.4);padding:0 20px 14px;word-break:break-all}
+.signout-btn{width:calc(100% - 20px);margin:0 10px 10px;padding:7px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:7px;color:rgba(245,232,200,.5);font-family:'DM Sans',sans-serif;font-size:.75rem;cursor:pointer;transition:all .15s}
+.signout-btn:hover{background:rgba(255,255,255,.12);color:rgba(245,232,200,.85)}
+/* SYNC INDICATOR */
+.sync{position:fixed;top:8px;right:12px;font-size:.68rem;color:var(--muted);z-index:999;transition:opacity .3s}
 </style>
 </head>
 <body>
-<div class="layout">
+
+<!-- AUTH SCREEN -->
+<div class="auth-wrap" id="auth-wrap">
+  <div class="auth-box">
+    <div class="auth-logo">La Cocina</div>
+    <div class="auth-sub">Pro Kitchen Suite</div>
+    <div class="auth-title" id="auth-title">Sign in</div>
+    <div class="auth-err" id="auth-err"></div>
+    <div id="auth-form-login">
+      <div class="fg"><label>Email</label><input type="email" id="auth-email" placeholder="chef@restaurant.com" autocomplete="email"></div>
+      <div class="fg"><label>Password</label><input type="password" id="auth-pass" placeholder="Your password" autocomplete="current-password"></div>
+      <button class="btn bp" style="width:100%;margin-top:4px;" onclick="signIn()">Sign In</button>
+      <div class="auth-loading" id="auth-loading">Signing in...</div>
+      <div class="auth-link">No account? <span onclick="showSignup()">Create one</span></div>
+    </div>
+    <div id="auth-form-signup" style="display:none;">
+      <div class="fg"><label>Email</label><input type="email" id="auth-email2" placeholder="chef@restaurant.com" autocomplete="email"></div>
+      <div class="fg"><label>Password</label><input type="password" id="auth-pass2" placeholder="Min 6 characters" autocomplete="new-password"></div>
+      <div class="fg"><label>Confirm Password</label><input type="password" id="auth-pass3" placeholder="Repeat password" autocomplete="new-password"></div>
+      <button class="btn bp" style="width:100%;margin-top:4px;" onclick="signUp()">Create Account</button>
+      <div class="auth-loading" id="auth-loading2">Creating account...</div>
+      <div class="auth-link">Already have an account? <span onclick="showLogin()">Sign in</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="sync" id="sync-indicator"></div>
+
+<div class="layout" style="display:none;" id="app-layout">
 
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
@@ -219,7 +263,9 @@ tbody tr:hover td{background:var(--warm)}
     <button class="nav-btn" data-sec="converter">Unit Converter</button>
     <button class="nav-btn" data-sec="ai">AI Advisor</button>
   </div>
-  <div class="sb-foot">All data saved locally on this device</div>
+  <div class="user-badge" id="user-badge"></div>
+<button class="signout-btn" onclick="signOut()">Sign out</button>
+<div class="sb-foot">Data synced to cloud</div>
 </aside>
 
 <header class="topbar"><div class="tb-brand">La Cocina</div><button class="ham" id="ham"><span></span><span></span><span></span></button></header>
@@ -692,6 +738,8 @@ tbody tr:hover td{background:var(--warm)}
   <button class="bb" data-sec="menu">Menu</button>
 </div></nav>
 
+</div><!-- end app-layout -->
+
 <!-- MODALS -->
 <div class="mwrap" id="mi"><div class="modal">
   <div class="mhd"><div class="mtitle">Add Ingredient</div><button class="mclose" onclick="closeM('mi')">✕</button></div>
@@ -770,8 +818,100 @@ tbody tr:hover td{background:var(--warm)}
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 'use strict';
+// ── SUPABASE ──
+const SUPA_URL='https://hdwpqiybtcaufloawrzp.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhkd3BxaXlidGNhdWZsb2F3cnpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNTgwNDYsImV4cCI6MjA5MDgzNDA0Nn0.dChGa4Z34agpZcbX0uvQySzYVf2F2wiKAIhErGOTBts';
+const supa=supabase.createClient(SUPA_URL,SUPA_KEY);
+let currentUser=null;
+
+// ── AUTH FUNCTIONS ──
+async function signIn(){
+  const email=document.getElementById('auth-email').value.trim();
+  const pass=document.getElementById('auth-pass').value;
+  const err=document.getElementById('auth-err');
+  const loading=document.getElementById('auth-loading');
+  if(!email||!pass){err.textContent='Please fill in all fields.';err.style.display='block';return;}
+  err.style.display='none';loading.style.display='block';
+  const {data,error}=await supa.auth.signInWithPassword({email,password:pass});
+  loading.style.display='none';
+  if(error){err.textContent=error.message;err.style.display='block';return;}
+  await onLogin(data.user);
+}
+async function signUp(){
+  const email=document.getElementById('auth-email2').value.trim();
+  const pass=document.getElementById('auth-pass2').value;
+  const pass2=document.getElementById('auth-pass3').value;
+  const err=document.getElementById('auth-err');
+  const loading=document.getElementById('auth-loading2');
+  if(!email||!pass){err.textContent='Please fill in all fields.';err.style.display='block';return;}
+  if(pass!==pass2){err.textContent='Passwords do not match.';err.style.display='block';return;}
+  if(pass.length<6){err.textContent='Password must be at least 6 characters.';err.style.display='block';return;}
+  err.style.display='none';loading.style.display='block';
+  const {data,error}=await supa.auth.signUp({email,password:pass});
+  loading.style.display='none';
+  if(error){err.textContent=error.message;err.style.display='block';return;}
+  err.style.display='none';
+  document.getElementById('auth-title').textContent='Check your email';
+  document.getElementById('auth-form-signup').innerHTML='<p style="font-size:.85rem;color:var(--muted);line-height:1.7;">A confirmation link has been sent to <strong>'+email+'</strong>. Click it to activate your account, then come back here to sign in.</p><div class="auth-link"><span onclick="showLogin()">Back to sign in</span></div>';
+}
+async function signOut(){
+  await supa.auth.signOut();
+  currentUser=null;ings=[];recs=[];inv=[];clog=[];exps=[];staff=[];
+  document.getElementById('app-layout').style.display='none';
+  document.getElementById('auth-wrap').style.display='flex';
+  showLogin();
+}
+function showSignup(){
+  document.getElementById('auth-form-login').style.display='none';
+  document.getElementById('auth-form-signup').style.display='block';
+  document.getElementById('auth-title').textContent='Create account';
+  document.getElementById('auth-err').style.display='none';
+}
+function showLogin(){
+  document.getElementById('auth-form-login').style.display='block';
+  document.getElementById('auth-form-signup').style.display='none';
+  document.getElementById('auth-title').textContent='Sign in';
+  document.getElementById('auth-err').style.display='none';
+}
+async function onLogin(user){
+  currentUser=user;
+  document.getElementById('auth-wrap').style.display='none';
+  document.getElementById('app-layout').style.display='flex';
+  document.getElementById('user-badge').textContent=user.email;
+  await loadAll();
+  renderDash();renderIng();renderLib();renderClog();
+  document.getElementById('c-date').valueAsDate=new Date();
+  document.getElementById('ex-date').valueAsDate=new Date();
+  buildDenoms();calcCash();
+}
+
+// ── SYNC INDICATOR ──
+function syncShow(msg){const el=document.getElementById('sync-indicator');el.textContent=msg;el.style.opacity='1';}
+function syncHide(){setTimeout(()=>{const el=document.getElementById('sync-indicator');el.style.opacity='0';},1500);}
+
+// ── LOAD ALL DATA ──
+async function loadAll(){
+  syncShow('Loading...');
+  const uid=currentUser.id;
+  const [i,r,v,c,e,s]=await Promise.all([
+    supa.from('ingredients').select('*').eq('user_id',uid).order('created_at'),
+    supa.from('recipes').select('*').eq('user_id',uid).order('created_at'),
+    supa.from('inventory').select('*').eq('user_id',uid).order('created_at'),
+    supa.from('cash_sessions').select('*').eq('user_id',uid).order('created_at',{ascending:false}),
+    supa.from('expenses').select('*').eq('user_id',uid).order('date',{ascending:false}),
+    supa.from('staff').select('*').eq('user_id',uid).order('created_at'),
+  ]);
+  ings=(i.data||[]).map(x=>{return{id:x.id,nm:x.nm,co:x.co,qt:x.qt,un:x.un,ca:x.ca,yl:x.yl,cpu:x.cpu};});
+  recs=(r.data||[]).map(x=>{return{id:x.id,nm:x.nm,tot:x.tot,per:x.per,pr:x.pr,pct:x.pct,sv:x.sv,cat:x.cat,ds:x.ds,pt:x.pt,il:x.il,steps:x.steps,alg:x.alg,dt:x.dt};});
+  inv=(v.data||[]).map(x=>{return{id:x.id,nm:x.nm,st:x.st,un:x.un,mn:x.mn,co:x.co,dt:x.dt};});
+  clog=(c.data||[]).map(x=>{return{id:x.id,date:x.date,sess:x.sess,grossTill:x.gross_till,floatIn:x.float_in,floatOut:x.float_out,netCash:x.net_cash,toBank:x.to_bank,card:x.card,vouch:x.vouch,online:x.online,loyCash:x.loy_cash,loyTotal:x.loy_total,grand:x.grand,pos:x.pos,bankExp:x.bank_exp,bankAct:x.bank_act,status:x.status,dt:x.dt};});
+  exps=(e.data||[]).map(x=>{return{id:x.id,desc:x.description,amt:x.amt,date:x.date,cat:x.cat,pay:x.pay,note:x.note};});
+  staff=(s.data||[]).map(x=>{return{id:x.id,nm:x.nm,role:x.role,type:x.type,rate:x.rate,hrs:x.hrs,weeklyWage:x.weekly_wage,monthlyWage:x.monthly_wage};});
+  syncHide();
+}
 // ── STATE ──
 let ings  = JSON.parse(localStorage.getItem('lcp_i')||'[]');
 let recs  = JSON.parse(localStorage.getItem('lcp_r')||'[]');
@@ -782,14 +922,62 @@ let staff = JSON.parse(localStorage.getItem('lcp_s')||'[]');
 const ALG = ['Gluten','Dairy','Eggs','Nuts','Peanuts','Shellfish','Fish','Soy','Sesame'];
 let aAlg=new Set(), bRows=[], stepN=0, chatH=[];
 
-function save(){
-  localStorage.setItem('lcp_i',JSON.stringify(ings));
-  localStorage.setItem('lcp_r',JSON.stringify(recs));
-  localStorage.setItem('lcp_v',JSON.stringify(inv));
-  localStorage.setItem('lcp_c',JSON.stringify(clog));
-  localStorage.setItem('lcp_e',JSON.stringify(exps));
-  localStorage.setItem('lcp_s',JSON.stringify(staff));
+// ── SUPABASE SAVE HELPERS ──
+async function dbSaveIng(ing){
+  const uid=currentUser.id;
+  const row={user_id:uid,nm:ing.nm,co:ing.co,qt:ing.qt,un:ing.un,ca:ing.ca,yl:ing.yl,cpu:ing.cpu};
+  if(typeof ing.id==='string'&&ing.id.length>10){
+    await supa.from('ingredients').update(row).eq('id',ing.id);
+  } else {
+    const {data}=await supa.from('ingredients').insert(row).select().single();
+    if(data)ing.id=data.id;
+  }
 }
+async function dbDelIng(id){await supa.from('ingredients').delete().eq('id',id);}
+async function dbSaveRec(rec){
+  const uid=currentUser.id;
+  const row={user_id:uid,nm:rec.nm,tot:rec.tot,per:rec.per,pr:rec.pr,pct:rec.pct,sv:rec.sv,cat:rec.cat,ds:rec.ds,pt:rec.pt,il:rec.il,steps:rec.steps,alg:rec.alg,dt:rec.dt};
+  if(rec.id&&typeof rec.id==='string'&&rec.id.length>10){
+    await supa.from('recipes').update(row).eq('id',rec.id);
+  } else {
+    const {data}=await supa.from('recipes').insert(row).select().single();
+    if(data)rec.id=data.id;
+  }
+}
+async function dbDelRec(id){await supa.from('recipes').delete().eq('id',id);}
+async function dbSaveInv(item){
+  const uid=currentUser.id;
+  const row={user_id:uid,nm:item.nm,st:item.st,un:item.un,mn:item.mn,co:item.co,dt:item.dt};
+  if(item.id&&typeof item.id==='string'&&item.id.length>10){
+    await supa.from('inventory').update(row).eq('id',item.id);
+  } else {
+    const {data}=await supa.from('inventory').insert(row).select().single();
+    if(data)item.id=data.id;
+  }
+}
+async function dbDelInv(id){await supa.from('inventory').delete().eq('id',id);}
+async function dbSaveSess(s){
+  const uid=currentUser.id;
+  const row={user_id:uid,date:s.date,sess:s.sess,gross_till:s.grossTill,float_in:s.floatIn,float_out:s.floatOut,net_cash:s.netCash,to_bank:s.toBank,card:s.card,vouch:s.vouch,online:s.online,loy_cash:s.loyCash,loy_total:s.loyTotal,grand:s.grand,pos:s.pos,bank_exp:s.bankExp,bank_act:s.bankAct,status:s.status,dt:s.dt};
+  const {data}=await supa.from('cash_sessions').insert(row).select().single();
+  if(data)s.id=data.id;
+}
+async function dbDelSess(id){await supa.from('cash_sessions').delete().eq('id',id);}
+async function dbSaveExp(exp){
+  const uid=currentUser.id;
+  const row={user_id:uid,description:exp.desc,amt:exp.amt,date:exp.date,cat:exp.cat,pay:exp.pay,note:exp.note};
+  const {data}=await supa.from('expenses').insert(row).select().single();
+  if(data)exp.id=data.id;
+}
+async function dbDelExp(id){await supa.from('expenses').delete().eq('id',id);}
+async function dbSaveStaff(m){
+  const uid=currentUser.id;
+  const row={user_id:uid,nm:m.nm,role:m.role,type:m.type,rate:m.rate,hrs:m.hrs,weekly_wage:m.weeklyWage,monthly_wage:m.monthlyWage};
+  const {data}=await supa.from('staff').insert(row).select().single();
+  if(data)m.id=data.id;
+}
+async function dbDelStaff(id){await supa.from('staff').delete().eq('id',id);}
+function save(){}
 
 // ── NAV ──
 function goTo(sec){
@@ -821,7 +1009,7 @@ function fmtGBP(n){return'£'+n.toFixed(2);}
 function fmt(n){return n.toLocaleString('en-GB',{maximumFractionDigits:0});}
 
 // ── INGREDIENTS ──
-function addIng(){
+async function addIng(){
   const nm=document.getElementById('i-nm').value.trim();
   const co=parseFloat(document.getElementById('i-co').value);
   const qt=parseFloat(document.getElementById('i-qt').value);
@@ -829,13 +1017,16 @@ function addIng(){
   const ca=document.getElementById('i-ca').value;
   const yl=parseFloat(document.getElementById('i-yl').value)||100;
   if(!nm||isNaN(co)||isNaN(qt)||qt<=0){alert('Please fill all fields.');return;}
-  ings.push({id:Date.now(),nm,co,qt,un,ca,yl,cpu:co/qt});
-  save(); renderIng(); closeM('mi');
+  const ing={nm,co,qt,un,ca,yl,cpu:co/qt};
+  syncShow('Saving...');
+  await dbSaveIng(ing);
+  ings.push(ing);
+  syncHide();renderIng();closeM('mi');
   ['i-nm','i-co','i-qt'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('i-yl').value='100';
   toast(`"${nm}" added`);
 }
-function delIng(id){if(!confirm('Delete?'))return;ings=ings.filter(i=>i.id!==id);save();renderIng();}
+async function delIng(id){if(!confirm('Delete?'))return;syncShow('Deleting...');await dbDelIng(id);ings=ings.filter(i=>i.id!==id);syncHide();renderIng();}
 function renderIng(f=''){
   const w=document.getElementById('ing-wrap');
   const l=ings.filter(i=>i.nm.toLowerCase().includes(f.toLowerCase()));
@@ -897,15 +1088,20 @@ function suggestP(){
   document.getElementById('b-sug').textContent=per>0&&tp>0?fmtGBP(per/(tp/100))+' / serving':'';
 }
 function clearB(){['b-nm','b-ds','b-pr','b-pt'].forEach(id=>document.getElementById(id).value='');document.getElementById('b-sv').value='4';document.getElementById('b-sc').value='4';document.getElementById('b-irs').innerHTML='';document.getElementById('b-steps').innerHTML='';bRows=[];stepN=0;aAlg.clear();renderAlg();liveCalc();}
-function saveRec(){
+async function saveRec(){
   const nm=document.getElementById('b-nm').value.trim();if(!nm){alert('Enter a recipe name.');return;}
   const sv=parseFloat(document.getElementById('b-sv').value)||1;const pr=parseFloat(document.getElementById('b-pr').value)||0;
   const cat=document.getElementById('b-cat').value;const ds=document.getElementById('b-ds').value.trim();const pt=document.getElementById('b-pt').value;
   let tot=0,il=[];bRows.forEach(id=>{if(!document.getElementById('ir-'+id))return;const iid=document.getElementById('rs-'+id)?.value;const qt=parseFloat(document.getElementById('rq-'+id)?.value)||0;const yl=parseFloat(document.getElementById('ry-'+id)?.value)||100;const un=document.getElementById('ru-'+id)?.value;const ing=ings.find(i=>i.id==iid);if(ing&&qt>0){const c=ing.cpu*qt*(100/yl);tot+=c;il.push({nm:ing.nm,qt,un,yl,co:c});}});
   let steps=[];document.querySelectorAll('[id^="st-"]').forEach(el=>{if(el.value.trim())steps.push(el.value.trim());});
   const per=tot/sv;const pct=pr>0?(per/pr)*100:null;
-  recs=recs.filter(r=>r.nm!==nm);recs.push({nm,tot,per,pr,pct,sv,cat,ds,pt,il,steps,alg:[...aAlg],dt:new Date().toLocaleDateString()});
-  save();toast(`"${nm}" saved`);renderLib();renderDash();
+  const existing=recs.find(r=>r.nm===nm);
+  const recObj={nm,tot,per,pr,pct,sv,cat,ds,pt,il,steps,alg:[...aAlg],dt:new Date().toLocaleDateString()};
+  if(existing){recObj.id=existing.id;}
+  syncShow('Saving...');
+  await dbSaveRec(recObj);
+  recs=recs.filter(r=>r.nm!==nm);recs.push(recObj);
+  syncHide();toast(`"${nm}" saved`);renderLib();renderDash();
 }
 
 function editRec(nm){
@@ -959,7 +1155,7 @@ function renderLib(f='',cat=''){
 function openRD(nm){
   const r=recs.find(x=>x.nm===nm);if(!r)return;
   document.getElementById('rd-t').textContent=r.nm;
-  document.getElementById('rd-del').onclick=()=>{if(!confirm('Delete?'))return;recs=recs.filter(x=>x.nm!==nm);save();renderLib();renderDash();closeM('mrec');toast('Deleted');};
+  const recToDelete=recs.find(x=>x.nm===nm);document.getElementById('rd-del').onclick=async()=>{if(!confirm('Delete?'))return;syncShow('Deleting...');if(recToDelete?.id)await dbDelRec(recToDelete.id);recs=recs.filter(x=>x.nm!==nm);syncHide();renderLib();renderDash();closeM('mrec');toast('Deleted');};
   document.getElementById('rd-edit').onclick=()=>{editRec(nm);};
   const cls=r.pct?(r.pct<30?'bgrn':r.pct<35?'byel':'bred'):'bg2';
   let h=`<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;"><span class="badge bg2">${r.cat}</span><span class="badge bg2">${r.sv} servings</span>${r.pt?`<span class="badge bg2">${r.pt} min</span>`:''} ${(r.alg||[]).map(a=>`<span class="badge bred">${a}</span>`).join('')}</div>${r.ds?`<p style="font-size:.83rem;color:var(--muted);margin-bottom:12px;">${r.ds}</p>`:''}
@@ -984,13 +1180,13 @@ function renderMenu(){
 }
 
 // ── INVENTORY ──
-function addInv(){
+async function addInv(){
   const nm=document.getElementById('iv-nm').value.trim();const st=parseFloat(document.getElementById('iv-st').value);const un=document.getElementById('iv-un').value;const mn=parseFloat(document.getElementById('iv-mn').value)||0;const co=parseFloat(document.getElementById('iv-co').value)||0;
   if(!nm||isNaN(st)){alert('Fill name and stock.');return;}
-  inv.push({id:Date.now(),nm,st,un,mn,co,dt:new Date().toLocaleDateString()});save();renderInv();closeM('minv');['iv-nm','iv-st','iv-mn','iv-co'].forEach(id=>document.getElementById(id).value='');toast(`"${nm}" added`);
+  const item={nm,st,un,mn,co,dt:new Date().toLocaleDateString()};syncShow('Saving...');await dbSaveInv(item);inv.push(item);syncHide();renderInv();closeM('minv');['iv-nm','iv-st','iv-mn','iv-co'].forEach(id=>document.getElementById(id).value='');toast(`"${nm}" added`);
 }
-function updInv(id,d){const it=inv.find(i=>i.id===id);if(!it)return;it.st=Math.max(0,parseFloat((it.st+d).toFixed(2)));it.dt=new Date().toLocaleDateString();save();renderInv();renderDash();}
-function delInv(id){inv=inv.filter(i=>i.id!==id);save();renderInv();}
+async function updInv(id,d){const it=inv.find(i=>i.id===id);if(!it)return;it.st=Math.max(0,parseFloat((it.st+d).toFixed(2)));it.dt=new Date().toLocaleDateString();syncShow('Saving...');await dbSaveInv(it);syncHide();renderInv();renderDash();}
+async function delInv(id){syncShow('Deleting...');await dbDelInv(id);inv=inv.filter(i=>i.id!==id);syncHide();renderInv();}
 function renderInv(){
   const low=inv.filter(i=>i.st<=i.mn).length;const val=inv.reduce((s,i)=>s+i.st*i.co,0);
   document.getElementById('i-tot').textContent=inv.length;document.getElementById('i-low').textContent=low;document.getElementById('i-val').textContent='£'+fmt(val);
@@ -1130,7 +1326,7 @@ function clearCash(){
   calcCash();
 }
 
-function saveSess(){
+async function saveSess(){
   let grossTill=0;[...COINS,...NOTES].forEach(d=>{grossTill+=(parseInt(document.getElementById('d'+d.v.toString().replace('.','_'))?.value)||0)*d.v;});
   const loyCash = parseFloat(document.getElementById('c-loy-cash')?.value)||0;
   const card   = parseFloat(document.getElementById('c-card')?.value)||0;
@@ -1162,11 +1358,11 @@ function saveSess(){
   if(bAct!==null&&floatIn>0){const bv=bAct-toBank;status=Math.abs(bv)<.01?'ok':bv>0?'over':'short';}
   else if(bExp!==null&&floatIn>0){const bv=bExp-toBank;status=Math.abs(bv)<.01?'ok':bv>0?'over':'short';}
 
-  clog.unshift({id:Date.now(),date,sess,grossTill,floatIn,floatOut,netCash,toBank,card,vouch,online,grand,pos:posTotal!==''?parseFloat(posTotal):null,bankExp:bExp,bankAct:bAct,status,dt:new Date().toLocaleString()});
-  save();renderClog();toast('Session saved');
+  const sess_obj={date,sess,grossTill,floatIn,floatOut,netCash,toBank,card,vouch,online,loyCash,loyTotal,grand,pos:posTotal!==''?parseFloat(posTotal):null,bankExp:bExp,bankAct:bAct,status,dt:new Date().toLocaleString()};
+  syncShow('Saving...');await dbSaveSess(sess_obj);clog.unshift(sess_obj);syncHide();renderClog();toast('Session saved');
 }
 
-function delSess(id){clog=clog.filter(s=>s.id!==id);save();renderClog();}
+async function delSess(id){syncShow('Deleting...');await dbDelSess(id);clog=clog.filter(s=>s.id!==id);syncHide();renderClog();}
 
 function renderClog(){
   const el=document.getElementById('c-log');
@@ -1275,14 +1471,14 @@ function calcFin(){
 function fbar(lbl,val,pct,col){return`<div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:.77rem;color:var(--muted);margin-bottom:3px;"><span>${lbl}</span><span>${val}</span></div><div class="pbar"><div class="pbar-f" style="width:${Math.min(pct,100)}%;background:${col}"></div></div></div>`;}
 
 // EXPENSES
-function addExp(){
+async function addExp(){
   const desc=document.getElementById('ex-desc').value.trim();const amt=parseFloat(document.getElementById('ex-amt').value);const date=document.getElementById('ex-date').value;const cat=document.getElementById('ex-cat').value;const pay=document.getElementById('ex-pay').value;const note=document.getElementById('ex-note').value.trim();
   if(!desc||isNaN(amt)||!date){alert('Please fill description, amount and date.');return;}
-  exps.push({id:Date.now(),desc,amt,date,cat,pay,note});save();renderExp();closeM('mexp');
+  const exp={desc,amt,date,cat,pay,note};syncShow('Saving...');await dbSaveExp(exp);exps.push(exp);syncHide();renderExp();closeM('mexp');
   ['ex-desc','ex-amt','ex-note'].forEach(id=>document.getElementById(id).value='');document.getElementById('ex-date').valueAsDate=new Date();
   toast(`Expense added: £${amt.toFixed(2)}`);populateMonthFilter();
 }
-function delExp(id){exps=exps.filter(e=>e.id!==id);save();renderExp();}
+async function delExp(id){syncShow('Deleting...');await dbDelExp(id);exps=exps.filter(e=>e.id!==id);syncHide();renderExp();}
 function populateMonthFilter(){
   const months=[...new Set(exps.map(e=>e.date.slice(0,7)))].sort().reverse();
   const sel=document.getElementById('exp-fmon');if(!sel)return;
@@ -1323,13 +1519,13 @@ function renderExp(){
 }
 
 // PAYROLL
-function addStaff(){
+async function addStaff(){
   const nm=document.getElementById('st-nm').value.trim();const role=document.getElementById('st-role').value;const type=document.getElementById('st-type').value;const rate=parseFloat(document.getElementById('st-rate').value);const hrs=parseFloat(document.getElementById('st-hrs').value)||0;
   if(!nm||isNaN(rate)){alert('Enter name and rate.');return;}
   const weeklyWage=type==='hourly'?rate*hrs:rate/4.33;const monthlyWage=type==='salary'?rate:rate*hrs*4.33;
-  staff.push({id:Date.now(),nm,role,type,rate,hrs,weeklyWage,monthlyWage});save();renderPayroll();closeM('mstaff');['st-nm','st-rate','st-hrs'].forEach(id=>document.getElementById(id).value='');toast(`${nm} added`);
+  const member={nm,role,type,rate,hrs,weeklyWage,monthlyWage};syncShow('Saving...');await dbSaveStaff(member);staff.push(member);syncHide();renderPayroll();closeM('mstaff');['st-nm','st-rate','st-hrs'].forEach(id=>document.getElementById(id).value='');toast(`${nm} added`);
 }
-function delStaff(id){staff=staff.filter(s=>s.id!==id);save();renderPayroll();}
+async function delStaff(id){syncShow('Deleting...');await dbDelStaff(id);staff=staff.filter(s=>s.id!==id);syncHide();renderPayroll();}
 function renderPayroll(){
   const totalWeekly=staff.reduce((s,m)=>s+m.weeklyWage,0);const totalMonthly=staff.reduce((s,m)=>s+m.monthlyWage,0);const totalHrs=staff.filter(m=>m.type==='hourly').reduce((s,m)=>s+m.hrs,0);
   document.getElementById('pay-cnt').textContent=staff.length;document.getElementById('pay-hrs').textContent=totalHrs.toFixed(0);document.getElementById('pay-wk').textContent=fmtGBP(totalWeekly);document.getElementById('pay-mo').textContent=fmtGBP(totalMonthly);
@@ -1454,9 +1650,23 @@ function renderDash(){
 }
 
 // ── INIT ──
-document.getElementById('c-date').valueAsDate=new Date();
-document.getElementById('ex-date').valueAsDate=new Date();
-buildDenoms();calcCash();renderIng();renderDash();renderLib();renderAlg();renderClog();populateMonthFilter();
+// Check for existing session on page load
+supa.auth.getSession().then(({data:{session}})=>{
+  if(session){
+    onLogin(session.user);
+  }
+});
+// Listen for auth state changes
+supa.auth.onAuthStateChange((event,session)=>{
+  if(event==='SIGNED_IN'&&session&&!currentUser){
+    onLogin(session.user);
+  }
+  if(event==='SIGNED_OUT'){
+    currentUser=null;
+    document.getElementById('app-layout').style.display='none';
+    document.getElementById('auth-wrap').style.display='flex';
+  }
+});
 </script>
 </body>
 </html>
