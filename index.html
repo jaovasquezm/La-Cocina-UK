@@ -374,8 +374,14 @@ tbody tr:hover td{background:var(--warm)}
         <div class="drow"><div class="dlbl" style="font-weight:700;min-width:auto;flex:1;">Notes total</div><div class="dval" id="c-ntot" style="color:var(--brown);font-size:.95rem;">£0.00</div></div>
       </div>
       <div class="dcard">
-        <div class="dtitle">Card &amp; Other</div>
-        <div class="fg"><label>Card Terminal Z-Report Total (£)</label><input type="number" id="c-card" placeholder="0.00" step="0.01" oninput="calcCash()"></div>
+        <div class="dtitle">Loyverse — Card &amp; Other</div>
+        <p style="font-size:.72rem;color:var(--muted);margin-bottom:10px;">Enter totals from the Loyverse Z-report for this session.</p>
+        <div class="fg"><label>Loyverse Cash Sales (£)</label><input type="number" id="c-loy-cash" placeholder="0.00" step="0.01" oninput="calcCash()"></div>
+        <div class="fg"><label>Loyverse Card Sales (£)</label><input type="number" id="c-card" placeholder="0.00" step="0.01" oninput="calcCash()"></div>
+        <div class="fg"><label>Loyverse Total Sales (£)<br><span style="font-size:.68rem;font-weight:400;text-transform:none;color:var(--muted-l);">Auto-filled when cash + card entered</span></label>
+          <input type="number" id="c-loy-total" placeholder="0.00" step="0.01" oninput="calcCash()" style="background:var(--warm);">
+        </div>
+        <hr class="divl">
         <div class="fg"><label>Vouchers / Gift Cards (£)</label><input type="number" id="c-vouch" placeholder="0.00" step="0.01" oninput="calcCash()"></div>
         <div class="fg"><label>Online / Delivery Platforms (£)</label><input type="number" id="c-online" placeholder="0.00" step="0.01" oninput="calcCash()"></div>
         <div class="fg"><label>Closing Float (to keep in till) (£)</label><input type="number" id="c-float-out" placeholder="150.00" step="0.01" oninput="calcCash()"></div>
@@ -588,6 +594,17 @@ tbody tr:hover td{background:var(--warm)}
 
   <!-- BREAKEVEN -->
   <div id="ftab-breakeven" class="ftab-c" style="display:none;">
+    <div class="card"><div class="ctitle">Utilities Cost Forecast</div>
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:14px;">See how utilities costs change across three sales scenarios. Based on a fixed base cost plus a variable portion that scales with revenue.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:14px;">
+        <div class="fg"><label>Fixed utilities base (£/month)</label><input type="number" id="ut-base" placeholder="e.g. 800" oninput="calcUtilForecast()"></div>
+        <div class="fg"><label>Variable rate (% of revenue)</label><input type="number" id="ut-var" placeholder="e.g. 1.5" step="0.1" oninput="calcUtilForecast()"></div>
+        <div class="fg"><label>Low sales scenario (£/month)</label><input type="number" id="ut-low" placeholder="e.g. 20000" oninput="calcUtilForecast()"></div>
+        <div class="fg"><label>Mid sales scenario (£/month)</label><input type="number" id="ut-mid" placeholder="e.g. 35000" oninput="calcUtilForecast()"></div>
+        <div class="fg"><label>High sales scenario (£/month)</label><input type="number" id="ut-high" placeholder="e.g. 50000" oninput="calcUtilForecast()"></div>
+      </div>
+      <div id="ut-result"></div>
+    </div>
     <div class="card"><div class="ctitle">Breakeven Analysis</div>
       <p style="font-size:.8rem;color:var(--muted);margin-bottom:14px;">Calculated from your P&amp;L Planner figures. Fill those in first.</p>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;">
@@ -698,6 +715,7 @@ tbody tr:hover td{background:var(--warm)}
   <div id="rd-c"></div>
   <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap;">
     <button class="btn bg bsm" onclick="window.print()">Print</button>
+    <button class="btn bs bsm" id="rd-edit">Edit Recipe</button>
     <button class="btn bdng bsm" id="rd-del">Delete</button>
     <button class="btn bp bsm" onclick="closeM('mrec')">Close</button>
   </div>
@@ -890,6 +908,46 @@ function saveRec(){
   save();toast(`"${nm}" saved`);renderLib();renderDash();
 }
 
+function editRec(nm){
+  const r=recs.find(x=>x.nm===nm);if(!r)return;
+  closeM('mrec');goTo('builder');
+  setTimeout(()=>{
+    document.getElementById('b-nm').value=r.nm;
+    document.getElementById('b-cat').value=r.cat||'Main';
+    document.getElementById('b-sv').value=r.sv||4;
+    document.getElementById('b-sc').value=r.sv||4;
+    document.getElementById('b-pr').value=r.pr||'';
+    document.getElementById('b-pt').value=r.pt||'';
+    document.getElementById('b-ds').value=r.ds||'';
+    document.getElementById('b-irs').innerHTML='';
+    document.getElementById('b-steps').innerHTML='';
+    bRows=[];stepN=0;aAlg.clear();
+    (r.alg||[]).forEach(a=>aAlg.add(a));
+    (r.il||[]).forEach(ing=>{
+      const ingObj=ings.find(i=>i.nm===ing.nm);
+      if(!ingObj)return;
+      const id=Date.now()+Math.random();bRows.push(id);
+      const w=document.getElementById('b-irs');
+      const d=document.createElement('div');d.id='ir-'+id;
+      d.style.cssText='display:grid;grid-template-columns:2fr 62px 62px 58px 26px;gap:5px;margin-bottom:5px;';
+      d.innerHTML=`<select id="rs-${id}" onchange="onRS(${id})"><option value="">— select —</option>${ings.map(i=>`<option value="${i.id}" ${i.id===ingObj.id?'selected':''}>${i.nm} (${i.un})</option>`).join('')}</select>
+        <input type="number" id="rq-${id}" value="${ing.qt}" step="0.01" oninput="liveCalc()">
+        <input type="text" id="ru-${id}" readonly style="background:var(--warm);color:var(--muted);" value="${ing.un}">
+        <input type="number" id="ry-${id}" value="${ing.yl||100}" min="1" max="200" oninput="liveCalc()" title="Yield%">
+        <button class="del-btn" onclick="remIR(${id})" style="align-self:center;">✕</button>`;
+      w.appendChild(d);
+    });
+    (r.steps||[]).forEach(s=>{
+      stepN++;const ul=document.getElementById('b-steps');
+      const li=document.createElement('li');li.className='sli';li.id='sl-'+stepN;
+      li.innerHTML=`<div class="snum">${stepN}</div><div style="flex:1;"><textarea rows="2" id="st-${stepN}">${s}</textarea></div><button class="del-btn" onclick="document.getElementById('sl-${stepN}').remove()" style="margin-top:3px;">✕</button>`;
+      ul.appendChild(li);
+    });
+    renderAlg();liveCalc();
+    toast('Editing: '+nm);
+  },100);
+}
+
 // ── LIBRARY ──
 function renderLib(f='',cat=''){
   cat=cat||document.getElementById('lib-cat')?.value||'';
@@ -902,6 +960,7 @@ function openRD(nm){
   const r=recs.find(x=>x.nm===nm);if(!r)return;
   document.getElementById('rd-t').textContent=r.nm;
   document.getElementById('rd-del').onclick=()=>{if(!confirm('Delete?'))return;recs=recs.filter(x=>x.nm!==nm);save();renderLib();renderDash();closeM('mrec');toast('Deleted');};
+  document.getElementById('rd-edit').onclick=()=>{editRec(nm);};
   const cls=r.pct?(r.pct<30?'bgrn':r.pct<35?'byel':'bred'):'bg2';
   let h=`<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;"><span class="badge bg2">${r.cat}</span><span class="badge bg2">${r.sv} servings</span>${r.pt?`<span class="badge bg2">${r.pt} min</span>`:''} ${(r.alg||[]).map(a=>`<span class="badge bred">${a}</span>`).join('')}</div>${r.ds?`<p style="font-size:.83rem;color:var(--muted);margin-bottom:12px;">${r.ds}</p>`:''}
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:9px;margin-bottom:14px;">
@@ -963,12 +1022,21 @@ function calcCash(){
   document.getElementById('c-ntot').textContent=fmtGBP(ns);
 
   const grossTill = cs+ns;
+  const loyCash = parseFloat(document.getElementById('c-loy-cash')?.value)||0;
   const card   = parseFloat(document.getElementById('c-card')?.value)||0;
+  // Auto-fill Loyverse total
+  const loyTotalEl = document.getElementById('c-loy-total');
+  if(loyTotalEl && (loyCash>0||card>0)){
+    const autoTotal = loyCash+card;
+    if(!loyTotalEl._manual) loyTotalEl.value = autoTotal.toFixed(2);
+  }
+  const loyTotal = parseFloat(document.getElementById('c-loy-total')?.value)||0;
   const vouch  = parseFloat(document.getElementById('c-vouch')?.value)||0;
   const online = parseFloat(document.getElementById('c-online')?.value)||0;
   const floatIn  = parseFloat(document.getElementById('c-float-in')?.value)||0;
   const floatOut = parseFloat(document.getElementById('c-float-out')?.value)||0;
-  const posTotal = parseFloat(document.getElementById('c-pos')?.value);
+  const posRaw = document.getElementById('c-pos')?.value;
+  const posTotal = posRaw!==''&&posRaw!==undefined ? parseFloat(posRaw) : (loyTotal>0?loyTotal:NaN);
   const bankExpV = document.getElementById('c-bank-exp')?.value;
   const bankActV = document.getElementById('c-bank-act')?.value;
   const bankExp  = bankExpV!==''?parseFloat(bankExpV):NaN;
@@ -1058,13 +1126,21 @@ function calcCash(){
 
 function clearCash(){
   [...COINS,...NOTES].forEach(d=>{const id='d'+d.v.toString().replace('.','_');const el=document.getElementById(id);if(el)el.value=0;const vel=document.getElementById(id+'_v');if(vel)vel.textContent='£0.00';});
-  ['c-card','c-vouch','c-online','c-float-in','c-float-out','c-pos','c-bank-exp','c-bank-act'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['c-loy-cash','c-card','c-loy-total','c-vouch','c-online','c-float-in','c-float-out','c-pos','c-bank-exp','c-bank-act'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   calcCash();
 }
 
 function saveSess(){
   let grossTill=0;[...COINS,...NOTES].forEach(d=>{grossTill+=(parseInt(document.getElementById('d'+d.v.toString().replace('.','_'))?.value)||0)*d.v;});
+  const loyCash = parseFloat(document.getElementById('c-loy-cash')?.value)||0;
   const card   = parseFloat(document.getElementById('c-card')?.value)||0;
+  // Auto-fill Loyverse total
+  const loyTotalEl = document.getElementById('c-loy-total');
+  if(loyTotalEl && (loyCash>0||card>0)){
+    const autoTotal = loyCash+card;
+    if(!loyTotalEl._manual) loyTotalEl.value = autoTotal.toFixed(2);
+  }
+  const loyTotal = parseFloat(document.getElementById('c-loy-total')?.value)||0;
   const vouch  = parseFloat(document.getElementById('c-vouch')?.value)||0;
   const online = parseFloat(document.getElementById('c-online')?.value)||0;
   const floatIn  = parseFloat(document.getElementById('c-float-in')?.value)||0;
@@ -1282,6 +1358,36 @@ function calcVATQ(){
 }
 
 // BREAKEVEN
+function calcUtilForecast(){
+  const base=parseFloat(document.getElementById('ut-base')?.value)||0;
+  const varRate=parseFloat(document.getElementById('ut-var')?.value)||0;
+  const low=parseFloat(document.getElementById('ut-low')?.value)||0;
+  const mid=parseFloat(document.getElementById('ut-mid')?.value)||0;
+  const high=parseFloat(document.getElementById('ut-high')?.value)||0;
+  const el=document.getElementById('ut-result');
+  if(!base&&!varRate){el.innerHTML='';return;}
+  const scenarios=[{lbl:'Low',rev:low,col:'var(--olive)'},{lbl:'Mid',rev:mid,col:'var(--gold)'},{lbl:'High',rev:high,col:'var(--rust)'}];
+  const maxCost=Math.max(...scenarios.map(s=>base+(s.rev*(varRate/100))));
+  el.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:14px;">
+    ${scenarios.map(s=>{
+      const cost=base+(s.rev*(varRate/100));
+      const pct=s.rev>0?(cost/s.rev*100).toFixed(1):0;
+      const barW=maxCost>0?(cost/maxCost*100).toFixed(0):0;
+      return`<div class="sc">
+        <div class="slbl">${s.lbl} scenario</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700;color:${s.col};">£${Math.round(cost).toLocaleString()}</div>
+        <div style="font-size:.72rem;color:var(--muted);margin-top:2px;">${s.rev>0?pct+'% of revenue':'Enter sales figure'}</div>
+        <div class="pbar" style="margin-top:6px;"><div class="pbar-f" style="width:${barW}%;background:${s.col}"></div></div>
+        ${s.rev>0?`<div style="font-size:.7rem;color:var(--muted-l);margin-top:4px;">Revenue: £${Math.round(s.rev).toLocaleString()}</div>`:''}
+      </div>`;
+    }).join('')}
+  </div>
+  <div style="background:var(--warm);border-radius:8px;padding:11px 14px;font-size:.8rem;color:var(--muted);">
+    <strong>Fixed:</strong> £${base.toLocaleString()} &nbsp;+&nbsp; <strong>Variable:</strong> ${varRate}% of sales.
+    ${mid>0?` At mid scenario, utilities represent <strong>${((base+(mid*(varRate/100)))/mid*100).toFixed(1)}%</strong> of revenue.`:''}
+  </div>`;
+}
+
 function calcBreakeven(){
   const cv=parseFloat(document.getElementById('f-cv')?.value)||0;const sp=parseFloat(document.getElementById('f-sp')?.value)||0;const dy=parseFloat(document.getElementById('f-dy')?.value)||0;
   const fp=parseFloat(document.getElementById('f-fp')?.value)||30;const rn=parseFloat(document.getElementById('f-rn')?.value)||0;const ut=parseFloat(document.getElementById('f-ut')?.value)||0;const ins=parseFloat(document.getElementById('f-ins')?.value)||0;const sft=parseFloat(document.getElementById('f-sft')?.value)||0;const mk=parseFloat(document.getElementById('f-mk')?.value)||0;const ot=parseFloat(document.getElementById('f-ot')?.value)||0;const wg=parseFloat(document.getElementById('f-wg')?.value)||0;
